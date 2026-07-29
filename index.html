@@ -82,6 +82,14 @@ textarea::placeholder{color:var(--muted);opacity:.65}
 .alloy .body{padding:12px;display:grid;gap:10px;
   grid-template-columns:repeat(auto-fit,minmax(128px,1fr))}
 .alloy .body label{font-size:11px}
+.note-item .note-body{padding:12px}
+.note-item .memo{white-space:pre-wrap;font-size:13.5px;line-height:1.75;
+  padding:10px 12px;border:1px solid var(--line);border-radius:8px}
+.note-item .sum{display:flex;gap:4px;flex-wrap:wrap}
+.note-item .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:10px;
+  border-top:1px solid var(--line);padding-top:10px}
+.note-item .photos{margin-top:10px}
+.mele{background:var(--accent-soft);border-radius:8px;padding:10px;margin:0 0 10px}
 .alloy .body .acts{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px;
   border-top:1px solid var(--line);padding-top:10px}
 input[type=number]{text-align:right}
@@ -160,10 +168,11 @@ details.card[open]>summary::before{content:'▾ '}
 
 <nav>
   <button data-t="price" class="on">相場</button>
-  <button data-t="calc"   data-block="tab.calc">体積・重量</button>
-  <button data-t="quote"  data-block="tab.quote">工賃見積</button>
-  <button data-t="jobs"   data-block="tab.jobs">記録</button>
-  <button data-t="settings">設定</button>
+  <button data-t="calc"   data-block="tab.calc">目方</button>
+  <button data-t="quote"  data-block="tab.quote">工賃</button>
+  <button data-t="notes"  data-block="tab.notes">覚書</button>
+  <button data-t="jobs"   data-block="tab.jobs">手控</button>
+  <button data-t="settings">設え</button>
 </nav>
 
 <main>
@@ -258,7 +267,7 @@ details.card[open]>summary::before{content:'▾ '}
   </details>
 </section>
 
-<!-- ============ 体積・重量 ============ -->
+<!-- ============ 目方 ============ -->
 <section id="calc">
   <div class="card">
     <h2>体積の求め方</h2>
@@ -348,7 +357,7 @@ details.card[open]>summary::before{content:'▾ '}
   </div>
 </section>
 
-<!-- ============ 工賃見積 ============ -->
+<!-- ============ 工賃 ============ -->
 <section id="quote">
   <div class="card">
     <h2>条件</h2>
@@ -380,7 +389,7 @@ details.card[open]>summary::before{content:'▾ '}
       <th>鋳造屋</th><th>上がり重量/個 (g)</th><th>課金重量 (g)</th><th>鋳造工賃</th><th>地金代</th><th>その他</th><th>税抜計</th><th>税込計</th>
     </tr></thead><tbody></tbody></table></div>
     <div id="q-empty" class="note">鋳造屋がまだ登録されていません。
-      <button class="ghost" id="go-caster">設定で鋳造屋を登録する</button></div>
+      <button class="ghost" id="go-caster">「設え」で鋳造屋を登録する</button></div>
   </div>
 
   <div class="card">
@@ -390,10 +399,53 @@ details.card[open]>summary::before{content:'▾ '}
 </section>
 
 
-<!-- ============ 記録 ============ -->
+<!-- ============ 覚書 ============ -->
+<section id="notes">
+  <div class="card">
+    <h2>覚書 <span class="pill" id="note-count"></span></h2>
+    <div class="row">
+      <div style="flex:3 1 220px"><input type="search" id="note-q" placeholder="調べたい言葉（例：巣、ロウ、超音波、メレ）"></div>
+    </div>
+    <div class="chip" id="note-tags" style="margin-top:10px"></div>
+    <div id="note-list" style="margin-top:10px"></div>
+    <div class="inline" style="margin-top:10px">
+      <button class="act" id="add-note">＋ 覚書を書く</button>
+      <button class="ghost" id="reset-notes">はじめの覚書を戻す</button>
+    </div>
+    <p class="note" id="note-hidden"></p>
+  </div>
+
+  <div class="card hide" id="note-form">
+    <h2 id="nf-title">覚書を書く</h2>
+    <div class="row">
+      <div style="flex:3 1 260px"><label>見出し</label>
+        <input type="text" id="nf-t" placeholder="例：巣が出たときに見直すところ"></div>
+      <div><label>札（カンマ区切り）</label>
+        <input type="text" id="nf-tag" placeholder="例：鋳造, 失敗"></div>
+    </div>
+    <div style="margin-top:10px">
+      <label>中身</label>
+      <textarea id="nf-b" rows="10" placeholder="手順、寸法、温度、うまくいった条件、次に気をつけること など"></textarea>
+    </div>
+    <div style="margin-top:12px">
+      <label>写真</label>
+      <div id="nf-photos" class="photos"></div>
+      <div class="inline" style="margin-top:6px">
+        <button class="ghost" id="nf-addphoto">＋ 写真を追加</button>
+        <input type="file" id="nf-photofile" accept="image/*" multiple class="hide">
+      </div>
+    </div>
+    <div class="inline" style="margin-top:12px">
+      <button class="act" id="nf-save">保存</button>
+      <button class="ghost" id="nf-cancel">やめる</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 手控 ============ -->
 <section id="jobs">
   <div class="card">
-    <h2>作業の記録 <span class="pill" id="job-count"></span></h2>
+    <h2>手控 <span class="pill" id="job-count"></span></h2>
     <div class="chip" id="job-filter"></div>
     <div id="job-list"></div>
     <button class="act" id="add-job" style="margin-top:10px">＋ 記録を追加</button>
@@ -573,6 +625,24 @@ details.card[open]>summary::before{content:'▾ '}
   </div>
 
   <div class="card">
+    <h2>意見箱</h2>
+    <p class="note" style="margin-top:0">使ってみて困ったこと、欲しい機能、数値の間違いなど、ひとことでも助かります。</p>
+    <textarea id="fb-body" rows="6" placeholder="例）K18の比重が自分の使っている地金と違う
+例）石留めの工賃も入れられるようにしてほしい
+例）スマホで◯◯の画面が見づらい"></textarea>
+    <label class="sw" style="margin-top:8px">
+      <input type="checkbox" id="fb-env" checked>
+      <span>端末や画面幅などの情報を添える（不具合の再現に役立ちます）</span>
+    </label>
+    <div class="inline" style="margin-top:10px">
+      <button class="act" id="fb-copy">写して送る用にコピー</button>
+      <button class="ghost" id="fb-mail">メールで送る</button>
+    </div>
+    <div id="fb-msg"></div>
+    <p class="note">コピーしたあと、LINEなどに貼り付けて送ってください。内容はどこにも自動送信されません。</p>
+  </div>
+
+  <div class="card">
     <h2>データ</h2>
     <div class="inline">
       <button class="ghost" id="export">バックアップを書き出し</button>
@@ -602,7 +672,9 @@ const $$ = s => [...document.querySelectorAll(s)];
 const K = { p:'jw_prices', h:'jw_hist', c:'jw_casters', s:'jw_settings',
             m:'jw_market', src:'jw_src',
             aOver:'jw_alloy_over', aHide:'jw_alloy_hide', aAdd:'jw_alloy_add',
-            prof:'jw_profile', blocks:'jw_blocks', jobs:'jw_jobs', migrated:'jw_migrated' };
+            prof:'jw_profile', blocks:'jw_blocks', jobs:'jw_jobs',
+            nOver:'jw_note_over', nHide:'jw_note_hide', nAdd:'jw_note_add',
+            migrated:'jw_migrated' };
 
 const DB = (()=>{
   let db = null;
@@ -721,6 +793,81 @@ const PRESET_ALLOYS = [
   {id:'CU',   name:'銅',              base:'other',    purity:1,      density:8.96,  factor:1, fixed:2},
 ];
 
+/* ---- プリセット層：はじめから入っている覚書。アプリ更新で差し替わる ----
+   数値はいずれも目安。地金商・ロット・道具で変わるので、各自で書き換えて使う前提。 */
+const PRESET_NOTES = [
+  { id:'p.mele', title:'ダイヤ（メレ）の直径とカラット', tags:['石','数値'], calc:'mele',
+    body:`ラウンドブリリアントの目安。カット比率で前後するので発注前に確認すること。
+
+  1.0mm≒0.005ct    1.3mm≒0.008ct    1.5mm≒0.012ct
+  1.7mm≒0.018ct    2.0mm≒0.030ct    2.2mm≒0.039ct
+  2.5mm≒0.057ct    3.0mm≒0.099ct    3.4mm≒0.144ct
+  3.8mm≒0.201ct    4.4mm≒0.312ct    5.2mm≒0.514ct
+  6.5mm≒1.005ct    7.4mm≒1.483ct    8.2mm≒2.018ct
+
+換算式（直径d mm）：ct ≒ 0.00366 × d³
+石座の穴あけは石径＋0.1〜0.2mm程度を見込む。` },
+
+  { id:'p.stone', title:'石の熱・超音波への耐性', tags:['石','注意'],
+    body:`【ロウ付けの熱で傷む → 必ず外す】
+  エメラルド（オイル含浸が抜ける）、オパール（割れる）、真珠、
+  トルコ石、ラピスラズリ、コーラル、アンバー、タンザナイト、
+  アメジスト・シトリン（変色）、トパーズ
+
+【超音波洗浄が不可】
+  エメラルド、オパール、真珠、トルコ石、ラピスラズリ、
+  コーラル、アンバー、タンザナイト、クラックの入った石全般
+
+【比較的強い】
+  ダイヤ、ルビー、サファイア、ガーネット、スピネル
+  ※加熱処理・含浸処理をした石は別。仕入先に確認すること。` },
+
+  { id:'p.solder', title:'ロウの種類と流れる温度', tags:['ロウ付け','数値'],
+    body:`銀ロウ（数字が大きいほど高温・銀の含有が多い）
+  早ロウ   約 640〜680℃
+  5分ロウ  約 690〜720℃
+  7分ロウ  約 720〜750℃
+  9分ロウ  約 770〜800℃
+
+金ロウ（K18用）  約 700〜800℃　色に合わせて選ぶ
+プラチナロウ     約 1000℃以上
+
+同じ品物で複数回ロウ付けするときは、高い温度のロウから使い、
+あとになるほど低いロウにすると前の箇所が流れない。
+※メーカーで温度が違う。手元のロウの表示を優先すること。` },
+
+  { id:'p.anneal', title:'焼きなましの温度', tags:['地金','数値'],
+    body:`加工で硬くなった地金を戻す温度の目安。
+
+  SV925      600〜650℃　　うっすら赤くなる程度／急冷可
+  K18        650〜700℃
+  Pt900      900〜1000℃　　しっかり赤熱
+  銅・真鍮    500〜600℃
+
+暗い場所で色を見るのが分かりやすい。加熱しすぎると結晶が粗くなり、
+表面が荒れたり脆くなる。銀は酸化被膜（黒ずみ）が出るので酸洗いする。` },
+
+  { id:'p.polish', title:'仕上げの番手の順番', tags:['仕上げ'],
+    body:`ヤスリ（荒目→細目）
+  → 紙ヤスリ #400 → #600 → #800 → #1000 → #1500 → #2000
+  → 青棒（中仕上げ）→ 白棒・赤棒（鏡面）
+
+前の番手の傷が消えてから次へ進む。傷の向きを90度変えながら
+かけると、消え残りが分かりやすい。
+番手を飛ばすと最後まで傷が残るので急がないこと。` },
+
+  { id:'p.ringsize', title:'リングサイズ（号数）と内径', tags:['リング','数値'],
+    body:`日本規格：内周(mm) = 号数 + 40　／　内径 = 内周 ÷ π
+
+  1号 内径13.0mm    5号 14.3mm    9号 15.6mm
+  11号 16.2mm      13号 16.9mm   15号 17.5mm
+  17号 18.1mm      19号 18.8mm   21号 19.4mm
+
+幅の広いリング（4mm以上）や甲丸は指に当たる面が増えるため、
+0.5〜1号ほど大きめに作ると入りやすい。
+鋳造の収縮を見込んで原型は少し大きめに。` },
+];
+
 /* ---- 個人データ層：本人の取引先。配布ビルドでは空にする ----
    BUILD.distribute = true にすると鋳造屋ゼロ件で始まる。
    単価は 2026年7月時点の調査値で、他人の見積に流用できるものではないため。 */
@@ -728,7 +875,7 @@ const BUILD = { distribute:true };
 const SEED_CASTERS = [];
 
 let prices = {gold:0, platinum:0, silver:0, date:'', src:''};
-let market, srcMode, hist, casters, settings, alloys, jobs;
+let market, srcMode, hist, casters, settings, alloys, jobs, notes;
 let lastVolume = 0;   // cm³ / 個
 
 /* プリセット ＋ 上書き － 非表示 ＋ 追加 を重ねて素材一覧を組み立てる。
@@ -747,6 +894,7 @@ function loadState(){
   hist     = load(K.h, []);            // 手動登録ぶん
   casters  = load(K.c, null) || JSON.parse(JSON.stringify(SEED_CASTERS));
   jobs     = load(K.jobs, []);
+  refreshNotes();
   settings = load(K.s, {tax:10, margin:0});
   refreshAlloys();
 }
@@ -755,11 +903,12 @@ function loadState(){
    作り方（CAD／ワックス／彫金／彫り）で要る機能が違うので、
    プロファイルで既定を決め、そこからの差分だけをユーザー設定として持つ。 */
 const BLOCKS = [
-  {id:'tab.calc',    g:'タブ',           n:'体積・重量'},
-  {id:'tab.quote',   g:'タブ',           n:'工賃見積'},
-  {id:'caster.list', g:'設定',           n:'鋳造屋の登録'},
-  {id:'tab.jobs',    g:'タブ',           n:'記録'},
-  {id:'jobs.stats',  g:'記録',           n:'実測から出た換算倍率'},
+  {id:'tab.calc',    g:'綴じ',         n:'目方（体積・重量）'},
+  {id:'tab.quote',   g:'綴じ',         n:'工賃（見積・比較）'},
+  {id:'caster.list', g:'設え',         n:'鋳造屋の登録'},
+  {id:'tab.notes',   g:'綴じ',         n:'覚書（調べもの）'},
+  {id:'tab.jobs',    g:'綴じ',         n:'手控（作業の記録）'},
+  {id:'jobs.stats',  g:'手控',         n:'実測から出た換算倍率'},
   {id:'price.chart', g:'相場',           n:'推移グラフ'},
   {id:'price.alloy', g:'相場',           n:'素材別の地金単価'},
   {id:'price.manual',g:'相場',           n:'手動での相場登録'},
@@ -771,7 +920,7 @@ const BLOCKS = [
 const PROFILES = {
   cad:     {n:'CAD中心',        d:'3Dデータから体積が出るので、ワックス重量からの換算は隠します', off:['calc.wax']},
   wax:     {n:'ワックス原型',   d:'ワックスから鋳造する流れ。すべて表示します',                  off:[]},
-  hand:    {n:'彫金（地金から）',d:'鋳造を使わないので、工賃見積と鋳造屋を隠します',              off:['tab.quote','caster.list','calc.wax','calc.ref','jobs.stats']},
+  hand:    {n:'彫金（地金から）',d:'鋳造を使わないので、工賃と鋳造屋を隠します',              off:['tab.quote','caster.list','calc.wax','calc.ref','jobs.stats']},
   engrave: {n:'彫り',           d:'相場の確認と作業記録が中心。計算まわりを隠します',            off:['tab.quote','caster.list','tab.calc','jobs.stats']},
   all:     {n:'すべて表示',     d:'制限なし',                                                    off:[]},
 };
@@ -835,7 +984,7 @@ function askProfile(){
   const d = document.createElement('div'); d.id='lightbox'; d.style.cursor='default';
   d.innerHTML = `<div class="card" style="max-width:440px;width:100%">
     <h2 class="hero"><span>ようこそ</span></h2>
-    <p style="margin:0 0 12px">作り方に合わせて、要らない機能を最初から隠します。あとから設定タブで変えられます。</p>
+    <p style="margin:0 0 12px">作り方に合わせて、要らない機能を最初から隠します。あとから「設え」で変えられます。</p>
     <div class="chip" id="ask-chip">${Object.entries(PROFILES).map(([k,p])=>
       `<button data-p="${k}">${p.n}</button>`).join('')}</div>
     <p class="note" id="ask-note">選んでください。</p></div>`;
@@ -1185,7 +1334,7 @@ function renderAlloyPrice(){
   $('#pd-note').innerHTML = `単価 =（主金属 × 純度）+（パラジウム × 割金比率）× 係数。
     銅・亜鉛など安価な割金は0円扱いです。パラジウム相場
     <b>${prices.palladium?yen(prices.palladium)+' /g':'未取得'}</b>。
-    K18WGやPt900の割金比率は地金商・ロットで変わるため、設定タブで実際の配合に合わせてください。
+    K18WGやPt900の割金比率は地金商・ロットで変わるため、「設え」で実際の配合に合わせてください。
     係数は精錬手数料などの上乗せ率です。`;
 }
 $('#save-price').onclick = ()=>{
@@ -1211,7 +1360,7 @@ $('#use-manual').onchange = e=>{
   syncPrices();
 };
 
-/* ---------- 体積・重量 ---------- */
+/* ---------- 目方 ---------- */
 const SHAPES = {
   'ring-flat':  {f:['内径 (mm)','幅 (mm)','厚み (mm)'], v:(d,w,t)=> Math.PI*(d+t)*w*t },
   'ring-round': {f:['内径 (mm)','幅 (mm)','厚み (mm)'], v:(d,w,t)=> Math.PI*(d+t)*w*t*0.7854 },
@@ -1407,6 +1556,186 @@ $('#seed-caster').onclick = ()=>{
 };
 if(BUILD.distribute) $('#seed-caster').classList.add('hide');
 
+/* ===================== 覚書 =====================
+   はじめから入っている知識（PRESET_NOTES）と、自分で書いたものを同じ場所に並べる。
+   プリセットは書き換えても差分だけ保存されるので、アプリ更新で新しい項目が届く。 */
+let editingNote = null, notePhotos = [], noteQ = '', noteTag = '';
+const openNotes = new Set();
+
+function refreshNotes(){
+  const over = load(K.nOver,{}), hide = load(K.nHide,[]), add = load(K.nAdd,[]);
+  notes = [ ...PRESET_NOTES.filter(n=>!hide.includes(n.id)).map(n=>({...n, ...(over[n.id]||{}), preset:true})),
+            ...add.map(n=>({...n, preset:false})) ];
+}
+const isPresetNote = id => PRESET_NOTES.some(n=>n.id===id);
+
+/* 直径 ↔ カラット（ラウンドブリリアント）。ct ≒ 0.00366 × d³ */
+const meleCt = d => 0.00366 * d*d*d;
+const meleMm = ct => Math.cbrt(ct/0.00366);
+
+function renderNotes(){
+  const over = load(K.nOver,{}), hide = load(K.nHide,[]);
+  const tags = [...new Set(notes.flatMap(n=>n.tags||[]))].sort();
+  $('#note-tags').innerHTML = tags.length
+    ? [`<button data-t="" class="${noteTag?'':'on'}">すべて</button>`,
+       ...tags.map(t=>`<button data-t="${esc(t)}" class="${noteTag===t?'on':''}">${esc(t)}</button>`)].join('') : '';
+  $$('#note-tags button').forEach(b=> b.onclick = ()=>{ noteTag=b.dataset.t; renderNotes(); });
+
+  const q = noteQ.trim().toLowerCase();
+  const list = notes.filter(n=>{
+    if(noteTag && !(n.tags||[]).includes(noteTag)) return false;
+    if(!q) return true;
+    return (n.title+' '+(n.body||'')+' '+(n.tags||[]).join(' ')).toLowerCase().includes(q);
+  });
+  $('#note-count').textContent = q||noteTag ? `${list.length}/${notes.length}件` : `${notes.length}件`;
+
+  const box = $('#note-list'); box.innerHTML='';
+  if(!list.length){ box.innerHTML = `<p class="note">${notes.length?'見つかりませんでした。':'覚書がありません。'}</p>`; }
+
+  list.forEach(n=>{
+    const edited = n.preset && over[n.id] && Object.keys(over[n.id]).length;
+    const d = document.createElement('details'); d.className='alloy note-item';
+    d.open = openNotes.has(n.id) || !!q;
+    d.addEventListener('toggle', ()=> d.open ? openNotes.add(n.id) : openNotes.delete(n.id));
+    d.innerHTML = `
+      <summary>
+        <span class="nm2">${esc(n.title)}</span>
+        <span class="sum">${(n.tags||[]).map(t=>`<span class="pill">${esc(t)}</span>`).join(' ')}</span>
+        ${n.preset ? (edited?'<span class="tag edit">書換え</span>':'') : '<span class="tag add">自分の</span>'}
+      </summary>
+      <div class="note-body">
+        ${n.calc==='mele' ? meleCalcHTML() : ''}
+        <div class="memo" style="background:var(--card)">${esc(n.body||'')}</div>
+        <div class="photos" data-np="${esc(n.id)}"></div>
+        <div class="acts">
+          ${edited?'<button class="ghost rv">はじめの内容に戻す</button>':''}
+          <button class="ghost e">書き換える</button>
+          <button class="del x">${n.preset?'隠す':'削除'}</button>
+        </div>
+      </div>`;
+    d.querySelector('.e').onclick = ()=> openNote(n.id);
+    d.querySelector('.rv')?.addEventListener('click', ()=>{
+      const o = load(K.nOver,{}); delete o[n.id]; save(K.nOver,o); refreshNotes(); renderNotes();
+    });
+    d.querySelector('.x').onclick = ()=>{
+      if(n.preset){ save(K.nHide, [...hide, n.id]); }
+      else{
+        if(!confirm(`「${n.title}」を削除しますか？元に戻せません。`)) return;
+        (n.photos||[]).forEach(p=>{ DB.delPhoto(p.id); delete urlCache[p.id]; });
+        save(K.nAdd, load(K.nAdd,[]).filter(x=>x.id!==n.id));
+      }
+      openNotes.delete(n.id); refreshNotes(); renderNotes();
+    };
+    box.appendChild(d);
+    renderPhotos(d.querySelector('[data-np]'), n.photos);
+    if(n.calc==='mele') bindMele(d);
+  });
+
+  const hidden = PRESET_NOTES.filter(n=>hide.includes(n.id));
+  $('#note-hidden').innerHTML = hidden.length
+    ? `隠した覚書：${hidden.map(n=>`<button class="ghost sh" data-id="${n.id}">${esc(n.title)} を戻す</button>`).join(' ')}` : '';
+  $$('#note-hidden .sh').forEach(b=> b.onclick = ()=>{
+    save(K.nHide, load(K.nHide,[]).filter(x=>x!==b.dataset.id)); refreshNotes(); renderNotes();
+  });
+}
+
+function meleCalcHTML(){
+  return `<div class="row mele" style="margin-bottom:10px">
+    <div><label>直径 (mm)</label><input type="number" class="m-d" step="0.1" value="2.0"></div>
+    <div><label>カラット (ct)</label><input type="number" class="m-ct" step="0.001" value="0.029"></div>
+    <div style="flex:2 1 200px;display:flex;align-items:flex-end">
+      <span class="note m-out" style="margin:0"></span></div>
+  </div>`;
+}
+function bindMele(root){
+  const d = root.querySelector('.m-d'), ct = root.querySelector('.m-ct'), out = root.querySelector('.m-out');
+  const show = ()=>{ const v=parseFloat(d.value)||0;
+    out.innerHTML = v ? `直径 ${num(v,2)}mm ＝ およそ <b>${num(meleCt(v),3)} ct</b>` : ''; };
+  d.oninput  = ()=>{ const v=parseFloat(d.value)||0; if(v>0) ct.value = meleCt(v).toFixed(3); show(); };
+  ct.oninput = ()=>{ const v=parseFloat(ct.value)||0; if(v>0) d.value = meleMm(v).toFixed(2); show(); };
+  show();
+}
+
+function openNote(id){
+  editingNote = id;
+  const n = id==null ? {title:'', body:'', tags:[], photos:[]} : notes.find(x=>x.id===id);
+  $('#nf-title').textContent = id==null ? '覚書を書く' : '覚書を書き換える';
+  $('#nf-t').value = n.title||''; $('#nf-b').value = n.body||'';
+  $('#nf-tag').value = (n.tags||[]).join(', ');
+  notePhotos = JSON.parse(JSON.stringify(n.photos||[]));
+  drawNotePhotos();
+  $('#note-form').classList.remove('hide');
+  $('#note-form').scrollIntoView({behavior:'smooth',block:'center'});
+}
+function drawNotePhotos(){
+  renderPhotos($('#nf-photos'), notePhotos, pid=>{
+    notePhotos = notePhotos.filter(p=>p.id!==pid);
+    DB.delPhoto(pid); delete urlCache[pid]; drawNotePhotos();
+  });
+}
+$('#add-note').onclick = ()=> openNote(null);
+$('#nf-cancel').onclick = ()=> $('#note-form').classList.add('hide');
+$('#nf-addphoto').onclick = ()=> $('#nf-photofile').click();
+$('#nf-photofile').onchange = async e=>{
+  for(const f of e.target.files){
+    const pid = 'p'+Date.now()+Math.round(Math.random()*1e6);
+    DB.putPhoto(pid, await shrink(f)); notePhotos.push({id:pid, name:f.name});
+  }
+  e.target.value=''; drawNotePhotos();
+};
+$('#nf-save').onclick = ()=>{
+  const rec = { title:$('#nf-t').value.trim(), body:$('#nf-b').value.trim(),
+                tags:$('#nf-tag').value.split(',').map(t=>t.trim()).filter(Boolean),
+                photos:notePhotos };
+  if(!rec.title){ alert('見出しを入れてください'); return; }
+  if(editingNote && isPresetNote(editingNote)){        // プリセットは差分だけ保存
+    const p = PRESET_NOTES.find(x=>x.id===editingNote), o = load(K.nOver,{});
+    const diff = {};
+    for(const f of ['title','body','tags','photos'])
+      if(JSON.stringify(rec[f]) !== JSON.stringify(p[f]||(f==='tags'||f==='photos'?[]:''))) diff[f]=rec[f];
+    if(Object.keys(diff).length) o[editingNote]=diff; else delete o[editingNote];
+    save(K.nOver, o);
+  }else if(editingNote){                                // 自分の覚書を更新
+    const add = load(K.nAdd,[]); const t = add.find(x=>x.id===editingNote);
+    if(t) Object.assign(t, rec); save(K.nAdd, add);
+  }else{                                                // 新規
+    const id = 'n'+Date.now();
+    save(K.nAdd, [...load(K.nAdd,[]), {id, ...rec}]); openNotes.add(id);
+  }
+  $('#note-form').classList.add('hide');
+  refreshNotes(); renderNotes();
+};
+$('#reset-notes').onclick = ()=>{
+  if(!confirm('はじめから入っている覚書への書き換えと非表示を取り消します。自分で書いた覚書は残ります。')) return;
+  drop(K.nOver); drop(K.nHide); refreshNotes(); renderNotes();
+};
+$('#note-q').addEventListener('input', e=>{ noteQ = e.target.value; renderNotes(); });
+
+/* ===================== 意見箱 ===================== */
+const FEEDBACK_TO = '2231.labo@gmail.com';   // 送り先。配布前に変えられるようここに置く
+function feedbackText(){
+  let t = $('#fb-body').value.trim();
+  if($('#fb-env').checked){
+    t += `\n\n---\n画面幅 ${window.innerWidth}px ／ ${navigator.userAgent}`
+       + `\n作り方 ${PROFILES[profile()].n} ／ 相場 ${prices.date||'未取得'}`;
+  }
+  return t;
+}
+$('#fb-copy').onclick = async ()=>{
+  const t = feedbackText();
+  if(!$('#fb-body').value.trim()){ alert('中身を書いてください'); return; }
+  try{ await navigator.clipboard.writeText(t); }
+  catch(e){ const a=$('#fb-body'); a.select(); document.execCommand('copy'); }
+  const m = $('#fb-msg'); m.className='msg';
+  m.textContent = 'コピーしました。LINEなどに貼り付けて送ってください。';
+  setTimeout(()=>{ m.className=''; m.textContent=''; }, 6000);
+};
+$('#fb-mail').onclick = ()=>{
+  if(!$('#fb-body').value.trim()){ alert('中身を書いてください'); return; }
+  location.href = `mailto:${FEEDBACK_TO}?subject=${encodeURIComponent('金工手帖 への意見')}`
+                + `&body=${encodeURIComponent(feedbackText())}`;
+};
+
 /* ===================== 記録 =====================
    案件ごとに写真・メモ・実績値を残す。数値は任意なので、
    鋳造に出さない人（彫金・彫り）は作業ログとしてだけ使える。 */
@@ -1491,7 +1820,7 @@ function renderJobStats(){
     tb.appendChild(tr);
   });
   $('#job-stats-note').innerHTML = map.size
-    ? '見積タブでワックス重量から計算するとき、この実測値が公表値より優先されます。件数が増えるほど自分の作風に近づきます。'
+    ? '「工賃」でワックス重量から計算するとき、この実測値が公表値より優先されます。件数が増えるほど自分の作風に近づきます。'
     : 'ワックス重量と実際の上がり重量の両方を記録すると、ここに自分の実測倍率が出ます。2〜3件あれば見積の精度が変わります。';
 }
 
@@ -1572,7 +1901,7 @@ function fillAlloySelects(){
   if(!$('#q-alloy').value) $('#q-alloy').value='SV925';
   if(!$('#to-alloy').value) $('#to-alloy').value='SV925';
 }
-/* 体積・重量 → 工賃見積 への受け渡し。押した時点の条件をそのまま持っていく */
+/* 目方 → 工賃 への受け渡し。押した時点の条件をそのまま持っていく */
 function handoffNote(){
   const a = alloys.find(x=>x.id===$('#to-alloy').value);
   const qty = Math.max(1, val('#qty')||1), waxMode = currentMode()==='wax';
@@ -1603,7 +1932,7 @@ $('#to-quote').onclick = ()=>{
   const qty = Math.max(1, val('#qty')||1);
   $('#q-qty').value = qty; $('#q-loss').value = val('#loss');
   const from = $('#q-from'); from.classList.remove('hide');
-  from.innerHTML = `「体積・重量」から取り込みました：<b>${esc(a.name)}</b> ／ ${
+  from.innerHTML = `「目方」から取り込みました：<b>${esc(a.name)}</b> ／ ${
     waxMode ? `ワックス ${num(wax,2)}g` : `${num(lastVolume*a.density,2)}g`} × ${qty}個`;
   showTab('quote');
   window.scrollTo({top:0, behavior:'smooth'});
@@ -1839,7 +2168,7 @@ async function initRender(){
   $('nav').style.top = $('header').offsetHeight + 'px';   // ヘッダーの実寸に追従させる
   const d = new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
   $('#price-date').textContent = d;
-  fillAlloySelects(); renderShapeFields(); renderCasters(); renderJobs();
+  fillAlloySelects(); renderShapeFields(); renderCasters(); renderJobs(); renderNotes();
   renderSettings(); renderBackupNote();
   renderProfile(); renderBlocks(); applyBlocks();
   syncPrices();          // 保存済みデータで即描画
