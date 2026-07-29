@@ -56,10 +56,9 @@ textarea::placeholder{color:var(--muted);opacity:.65}
 .caster .memo{white-space:pre-wrap;font-size:13px;color:var(--fg);margin-top:8px;
   padding:8px 10px;background:var(--card);border-radius:8px;border:1px solid var(--line)}
 .caster details.memo>summary{cursor:pointer;color:var(--muted);white-space:nowrap;
-  overflow:hidden;text-overflow:ellipsis;list-style:none}
-.caster details.memo>summary::before{content:'▸ ';font-size:10px}
+  overflow:hidden;text-overflow:ellipsis}
+.caster details.memo>summary::before{width:22px;height:22px;font-size:11px;vertical-align:-6px;margin-right:5px}
 .caster details.memo[open]>summary{white-space:normal}
-.caster details.memo[open]>summary::before{content:'▾ '}
 .caster details.memo .body{white-space:pre-wrap;margin-top:6px}
 .photos{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
 .photos figure{margin:0;position:relative;width:88px;height:88px;border:1px solid var(--line);
@@ -76,11 +75,9 @@ textarea::placeholder{color:var(--muted);opacity:.65}
 
 /* 素材は1件ずつ開閉する。閉じているときは要点だけ見せる */
 .alloy{border:1px solid var(--line);border-radius:10px;background:var(--bg);margin-bottom:8px}
-.alloy>summary{cursor:pointer;padding:10px 12px;list-style:none;
+.alloy>summary{cursor:pointer;padding:9px 12px;
   display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap}
-.alloy>summary::-webkit-details-marker{display:none}
-.alloy>summary::before{content:'▸';font-size:11px;color:var(--muted);flex:none;width:10px}
-.alloy[open]>summary::before{content:'▾'}
+.alloy>summary::before{background:var(--bg)}
 .alloy[open]>summary{border-bottom:1px solid var(--line)}
 .alloy .nm2{font-weight:600;flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .alloy .sum{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;flex:1 1 auto}
@@ -216,16 +213,25 @@ hr{border:none;border-top:1px solid var(--line);margin:12px 0}
 .grid{stroke:var(--line)} .axis{fill:var(--muted);font-size:11px}
 .plabel{fill:var(--fg);font-size:12px}
 .pbox .sub{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;min-height:18px}
-details.card>summary{cursor:pointer;font-size:14px;color:var(--muted);font-weight:600;letter-spacing:.04em;list-style:none}
-details.card>summary::before{content:'▸ ';font-size:11px}
-details.card[open]>summary::before{content:'▾ '}
+/* 折りたたみの印。押す場所だと一目でわかるよう、丸枠に入れた大きめの三角にする。
+   閉じているときは右向き、開くと下向きに回る（同じ字を回すので大きさが揃う） */
+details>summary{list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:'▾';box-sizing:border-box;
+  width:26px;height:26px;flex:none;display:inline-flex;align-items:center;justify-content:center;
+  vertical-align:-8px;margin-right:2px;
+  border:1.5px solid var(--accent);border-radius:50%;background:var(--card);
+  color:var(--accent);font-size:13px;line-height:1;
+  transform:rotate(-90deg);transition:transform .15s ease}
+details[open]>summary::before{transform:rotate(0)}
+details>summary:hover::before{background:var(--accent-soft)}
+details.card>summary{cursor:pointer;font-size:14px;color:var(--muted);font-weight:600;letter-spacing:.04em;
+  display:flex;align-items:center;gap:10px}
 /* カードの中の折りたたみ。注記と見分けがつくよう、枠と太字で操作部品に見せる */
 details.fold{border:1px solid var(--line);border-radius:8px;background:var(--bg);margin-top:12px}
-details.fold>summary{cursor:pointer;list-style:none;padding:11px 13px;
-  font-size:14px;font-weight:600;color:var(--fg);display:flex;align-items:center;gap:9px}
-details.fold>summary::-webkit-details-marker{display:none}
-details.fold>summary::before{content:'▸';font-size:11px;color:var(--accent);width:10px;flex:none}
-details.fold[open]>summary::before{content:'▾'}
+details.fold>summary{cursor:pointer;list-style:none;padding:10px 12px;
+  font-size:14px;font-weight:600;color:var(--fg);display:flex;align-items:center;gap:10px}
+details.fold>summary::before{background:var(--bg)}
 details.fold[open]>summary{border-bottom:1px solid var(--line)}
 details.fold>summary:hover{color:var(--accent)}
 details.fold>*:not(summary){margin-left:13px;margin-right:13px}
@@ -842,18 +848,17 @@ button.link:hover{opacity:.75}
   </details>
 
   <div class="card">
-    <h2>作り方のタイプ</h2>
+    <h2>製作者のタイプ</h2>
     <div class="chip" id="profile-chip"></div>
     <p class="note" id="profile-note"></p>
-  </div>
-
-  <div class="card">
-    <h2>表示する機能</h2>
-    <div id="block-list"></div>
-    <div class="inline" style="margin-top:10px">
-      <button class="ghost" id="reset-blocks">タイプの初期状態に戻す</button>
-    </div>
-    <p class="note">使わない機能を消しても、データは残ります。あとで戻せば元どおり表示されます。</p>
+    <details class="fold" id="block-fold">
+      <summary>表示する機能を個別に決める <span class="pill" id="block-n"></span></summary>
+      <div id="block-list"></div>
+      <div class="inline" style="margin-top:10px">
+        <button class="ghost" id="reset-blocks">タイプの初期状態に戻す</button>
+      </div>
+      <p class="note" style="margin-bottom:0">使わない機能を消しても、データは残ります。あとで戻せば元どおり表示されます。</p>
+    </details>
   </div>
 
   <div class="card">
@@ -1289,10 +1294,12 @@ function renderProfile(){
     save(K.prof, b.dataset.p); save(K.blocks, {});   // タイプを変えたら個別調整はリセット
     renderInvoiceSettings(); renderProfile(); renderBlocks(); applyBlocks();
   });
-  $('#profile-note').textContent = PROFILES[profile()].d + '。下の「表示する機能」で個別に足し引きできます。';
+  $('#profile-note').textContent = PROFILES[profile()].d + '。下の「表示する機能を個別に決める」で足し引きできます。';
 }
 function renderBlocks(){
   const ov = load(K.blocks,{}), groups = [...new Set(BLOCKS.map(b=>b.g))];
+  const n = Object.keys(ov).length;
+  $('#block-n').textContent = n ? `${n}件 変更中` : '既定のまま';
   $('#block-list').innerHTML = groups.map(g=>
     `<div style="margin-bottom:8px"><div class="nm" style="font-size:12px;color:var(--muted)">${g}</div>
       <div class="row" style="gap:4px 16px">${BLOCKS.filter(b=>b.g===g).map(b=>
@@ -1309,12 +1316,12 @@ function renderBlocks(){
 }
 $('#reset-blocks').onclick = ()=>{ save(K.blocks,{}); renderBlocks(); applyBlocks(); };
 
-/* 初回だけ作り方を尋ねる */
+/* 初回だけ製作者のタイプを尋ねる */
 function askProfile(){
   const d = document.createElement('div'); d.id='lightbox'; d.style.cursor='default';
   d.innerHTML = `<div class="card" style="max-width:440px;width:100%">
     <h2 class="hero"><span>ようこそ</span></h2>
-    <p style="margin:0 0 12px">作り方に合わせて、要らない機能を最初から隠します。あとから「設え」で変えられます。</p>
+    <p style="margin:0 0 12px">お仕事の型に合わせて、要らない機能を最初から隠します。あとから「設え」で変えられます。</p>
     <div class="chip" id="ask-chip">${Object.entries(PROFILES).map(([k,p])=>
       `<button data-p="${k}">${p.n}</button>`).join('')}</div>
     <p class="note" id="ask-note">選んでください。</p></div>`;
@@ -2118,7 +2125,7 @@ function feedbackText(){
   let t = $('#fb-body').value.trim();
   if($('#fb-env').checked){
     t += `\n\n---\n画面幅 ${window.innerWidth}px ／ ${navigator.userAgent}`
-       + `\n作り方 ${PROFILES[profile()].n} ／ 相場 ${prices.date||'未取得'}`;
+       + `\nタイプ ${PROFILES[profile()].n} ／ 相場 ${prices.date||'未取得'}`;
   }
   return t;
 }
