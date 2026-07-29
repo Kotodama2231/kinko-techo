@@ -21,8 +21,6 @@ body{margin:0;font-family:-apple-system,"Segoe UI","Hiragino Kaku Gothic ProN","
 header{padding:10px 16px;border-bottom:1px solid var(--line);background:var(--card);
        display:flex;align-items:center;gap:11px;position:sticky;top:0;z-index:10}
 header #logo{width:38px;height:38px;flex:none;display:block;color:var(--fg)}
-header #brand-logo{width:38px;height:38px;flex:none;display:block;object-fit:contain}
-@media (prefers-color-scheme: dark){ header #brand-logo{filter:invert(1)} }
 header .brand{display:flex;flex-direction:column;gap:1px;min-width:0}
 header h1{font-size:19px;margin:0;letter-spacing:.14em;font-weight:600;line-height:1.15}
 header .sub{color:var(--muted);font-size:10px;letter-spacing:.22em}
@@ -740,8 +738,6 @@ details.card[open]>summary::before{content:'▾ '}
             <input type="file" id="iv-logo-file" accept="image/*" class="hide">
             <button class="del hide" id="iv-logo-del">削除</button>
           </div>
-          <label class="sw"><input type="checkbox" id="iv-header">
-            <span>アプリの上部にも自分の屋号とロゴを表示する</span></label>
           <p class="note" style="margin:0">白背景の画像は自動で背景を抜きます。長辺256pxに縮小して保存します。</p>
         </div>
       </div>
@@ -2414,35 +2410,18 @@ function renderInvoiceSettings(){
   const iv = load(K.inv, {mult:2.5, days:14});
   $('#iv-name').value = iv.name||''; $('#iv-contact').value = iv.contact||'';
   $('#iv-terms').value = iv.terms||''; $('#iv-mult').value = iv.mult||2.5; $('#iv-days').value = iv.days||14;
-  $('#iv-header').checked = !!iv.useHeader;
   $('#s-mult').value = iv.mult||2.5; $('#s-days').value = iv.days||14;   // 見積欄の既定値にも反映
   $('#iv-n').textContent = iv.name ? '設定済み' : '未設定';
   $('#iv-logo-box').innerHTML = iv.logo
     ? `<figure><img src="${iv.logo}" alt="ロゴ"></figure>`
     : '<p class="note" style="margin:0">未設定</p>';
   $('#iv-logo-del').classList.toggle('hide', !iv.logo);
-  applyBrand();
-}
-/* 屋号とロゴをアプリ上部に反映（未設定ならアプリ既定のまま） */
-function applyBrand(){
-  const iv = load(K.inv, {});
-  const on = iv.useHeader && (iv.name || iv.logo);
-  $('header h1').textContent = on && iv.name ? iv.name : '金工手帖';
-  $('header .sub').textContent = on && iv.name ? '金工手帖' : '相場・見積・記録';
-  const old = $('#brand-logo'); if(old) old.remove();
-  $('#logo').classList.toggle('hide', !!(on && iv.logo));
-  if(on && iv.logo){
-    const im = document.createElement('img');
-    im.id='brand-logo'; im.src=iv.logo; im.alt='';
-    $('#logo').insertAdjacentElement('afterend', im);
-  }
 }
 ['#iv-name','#iv-contact','#iv-terms','#iv-mult','#iv-days'].forEach(x=> $(x).onchange = ()=>{
   saveInvoice({ name:$('#iv-name').value.trim(), contact:$('#iv-contact').value.trim(),
                 terms:$('#iv-terms').value.trim(), mult:val('#iv-mult')||2.5, days:val('#iv-days')||14 });
   renderInvoiceSettings(); renderSell();
 });
-$('#iv-header').onchange = ()=>{ saveInvoice({useHeader:$('#iv-header').checked}); renderInvoiceSettings(); };
 $('#iv-logo-add').onclick = ()=> $('#iv-logo-file').click();
 $('#iv-logo-file').onchange = async e=>{
   const f = e.target.files[0]; e.target.value=''; if(!f) return;
