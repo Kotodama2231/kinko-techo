@@ -2316,7 +2316,8 @@ function renderEst(){
     tr.innerHTML = `
       <td data-l="品名"><input value="${esc(r.n||'')}" data-f="n" placeholder="例：彫り代／3Dデータ作成">
         <input value="${esc(r.memo||'')}" data-f="memo" placeholder="補足（任意）"
-          style="margin-top:4px;font-size:12px;color:var(--muted)"></td>
+          style="margin-top:4px;font-size:12px;color:var(--muted)">
+        ${r.src==='quote'?'<div class="tag edit" title="工賃から送った明細。もう一度送ると差し替わります">工賃から</div>':''}</td>
       <td data-l="数量"><input type="number" step="1" value="${r.q}" data-f="q"></td>
       <td data-l="単価"><input type="number" step="1" value="${r.u}" data-f="u"></td>
       <td data-l="金額" class="num">${yen((r.q||0)*(r.u||0))}</td>
@@ -2378,11 +2379,18 @@ function renderSell(){
 $('#to-invoice').onclick = ()=>{
   const s = sellPrice(); if(!s){ alert('先に素材と重量を入れてください'); return; }
   const q = lastQuote;
-  addRow({ n:`${q.alloyName}　${$('#s-subj').value.trim()||'製作一式'}`,
-           memo:`地金重量 約${num(q.wProd,2)}g／個`, q:q.qty, u:s.goods/q.qty });
-  if(s.design) addRow({ n:'デザイン料', q:q.qty, u:s.design/q.qty });
-  draft.metal = true; $('#s-metal').checked = true; saveDraft();
+  /* 前に送った分は差し替える。押すたびに増えて二重計上になるのを防ぐ */
+  const had = draft.rows.some(r=>r.src==='quote');
+  draft.rows = draft.rows.filter(r=>r.src!=='quote');
+  draft.rows.push({ src:'quote', n:`${q.alloyName}　${$('#s-subj').value.trim()||'製作一式'}`,
+                    memo:`地金重量 約${num(q.wProd,2)}g／個`, q:q.qty, u:s.goods/q.qty });
+  if(s.design) draft.rows.push({ src:'quote', n:'デザイン料', memo:'', q:q.qty, u:s.design/q.qty });
+  draft.metal = true; $('#s-metal').checked = true;
+  save(K.draft, draft); saveDraft(); renderEst();
   showTab('est'); window.scrollTo({top:0,behavior:'smooth'});
+  const w = $('#est-warn'); w.className='msg';
+  w.textContent = had ? '工賃から送った明細を新しい内容に差し替えました。' : '工賃から明細を追加しました。';
+  setTimeout(()=>{ w.className='note'; renderEstTotal(); }, 5000);
 };
 
 function invoiceHTML(){
