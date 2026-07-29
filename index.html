@@ -90,6 +90,44 @@ textarea::placeholder{color:var(--muted);opacity:.65}
   border-top:1px solid var(--line);padding-top:10px}
 .note-item .photos{margin-top:10px}
 .mele{background:var(--accent-soft);border-radius:8px;padding:10px;margin:0 0 10px}
+/* ===== 見積書 ===== */
+#inv-wrap{position:fixed;inset:0;z-index:200;background:var(--bg);overflow:auto;padding:0 0 40px}
+#inv-bar{position:sticky;top:0;z-index:2;background:var(--card);border-bottom:1px solid var(--line);
+  padding:10px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+#invoice{background:#fff;color:#222;max-width:760px;margin:18px auto;padding:34px 38px;
+  box-shadow:0 2px 14px rgba(0,0,0,.12);font-size:13px;line-height:1.7}
+#invoice .ttl{text-align:center;font-size:24px;letter-spacing:.5em;font-weight:600;
+  margin:0 0 22px;padding-left:.5em}
+#invoice .head{display:flex;justify-content:space-between;gap:24px;align-items:flex-start}
+#invoice .to{flex:1 1 auto;min-width:0}
+#invoice .to .nm{font-size:17px;border-bottom:1px solid #222;padding-bottom:4px;margin-bottom:10px}
+#invoice .from{flex:0 0 auto;text-align:left;font-size:12px;white-space:pre-wrap;position:relative;
+  padding-left:52px;min-height:46px}
+#invoice .from .lg{position:absolute;left:0;top:2px;width:42px;height:42px;color:#222}
+#invoice .from b{font-size:14px}
+#invoice .sum{margin:20px 0 6px;font-size:15px}
+#invoice .sum .amt{display:inline-block;border-bottom:2px solid #222;font-size:22px;
+  font-weight:600;padding:0 14px 3px;margin-left:10px;font-variant-numeric:tabular-nums}
+#invoice table{width:100%;border-collapse:collapse;margin-top:14px;font-size:12.5px}
+#invoice th{background:#f2efe8;border:1px solid #bbb;padding:7px 8px;font-weight:600;text-align:center}
+#invoice td{border:1px solid #ccc;padding:7px 8px;font-variant-numeric:tabular-nums}
+#invoice td.r{text-align:right}#invoice td.c{text-align:center}
+#invoice tr.tot td{background:#f7f5f0;font-weight:600;font-size:14px}
+#invoice .meta{margin-top:16px;font-size:12px}
+#invoice .meta dt{float:left;clear:left;width:6.5em;color:#555}
+#invoice .meta dd{margin:0 0 3px 7em}
+#invoice .rem{margin-top:14px;font-size:11.5px;color:#444;white-space:pre-wrap;
+  border-top:1px solid #ddd;padding-top:10px}
+@media (max-width:640px){ #invoice{padding:20px 16px;margin:10px;font-size:12px}
+  #invoice .head{flex-direction:column;gap:14px} #invoice .ttl{font-size:20px} }
+@media print{
+  header,nav,main,#inv-bar{display:none!important}
+  #inv-wrap{position:static;overflow:visible;padding:0;background:#fff}
+  #inv-wrap.hide{display:block!important}
+  #invoice{box-shadow:none;margin:0;max-width:none;padding:0;color:#000}
+  @page{size:A4;margin:16mm}
+}
+
 .cuts{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px;margin-bottom:12px}
 .cut{margin:0;text-align:center;border:1px solid var(--line);border-radius:8px;
   padding:9px 5px 7px;background:var(--card)}
@@ -403,10 +441,54 @@ details.card[open]>summary::before{content:'▾ '}
   </div>
 
   <div class="card">
-    <h2>内訳（最安の業者）</h2>
+    <h2>内訳（最安の業者）<span class="pill">原価</span></h2>
     <div id="q-detail" class="note">—</div>
   </div>
+
+  <div class="card handoff" data-block="quote.sell">
+    <h2>見積書をつくる</h2>
+    <div class="row">
+      <div><label>掛け率（原価 ×）</label><input type="number" id="s-mult" step="0.1" value="2.5"></div>
+      <div><label>端数の丸め</label><select id="s-round">
+        <option value="100">100円単位</option><option value="1000">1,000円単位</option>
+        <option value="500">500円単位</option><option value="1">丸めない</option></select></div>
+      <div><label>石代（円/個・実費）</label><input type="number" id="s-stone" value="0"></div>
+      <div><label>送料・梱包（円/式）</label><input type="number" id="s-ship" value="0"></div>
+    </div>
+    <p class="note" id="s-calc" style="margin-top:10px"></p>
+
+    <details style="margin-top:8px">
+      <summary style="cursor:pointer;font-size:13px;color:var(--muted)">宛名・件名など、見積書に載せる内容</summary>
+      <div class="row" style="margin-top:8px">
+        <div style="flex:2 1 220px"><label>宛名</label><input type="text" id="s-to" placeholder="山田 太郎"></div>
+        <div><label>敬称</label><select id="s-hon">
+          <option>様</option><option>御中</option><option value="">（なし）</option></select></div>
+        <div><label>有効期限（日）</label><input type="number" id="s-days" value="14"></div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <div style="flex:2 1 260px"><label>件名</label><input type="text" id="s-subj" placeholder="K18イエロー リング 製作"></div>
+        <div><label>納期の目安</label><input type="text" id="s-lead" placeholder="約3週間"></div>
+      </div>
+      <div style="margin-top:8px"><label>備考（相場の注記は自動で入ります）</label>
+        <textarea id="s-note" rows="3" placeholder="例）サイズ直しは1回まで無料"></textarea></div>
+    </details>
+
+    <div class="inline" style="margin-top:12px">
+      <button class="act" id="make-invoice">見積書を表示</button>
+    </div>
+    <p class="note">見積書には鋳造屋名・地金の仕入単価・原価は載りません。商品代金としてまとめて表示されます。</p>
+  </div>
 </section>
+
+<!-- 見積書（画面では隠し、表示ボタンで開く） -->
+<div id="inv-wrap" class="hide">
+  <div id="inv-bar">
+    <button class="act" id="inv-print">印刷 / PDFで保存</button>
+    <button class="ghost" id="inv-close">閉じる</button>
+    <span class="note" style="margin:0">印刷画面で「送信先」を <b>PDFに保存</b> にすると書き出せます</span>
+  </div>
+  <div id="invoice"></div>
+</div>
 
 
 <!-- ============ 覚書 ============ -->
@@ -637,6 +719,24 @@ details.card[open]>summary::before{content:'▾ '}
     <p class="note">上乗せ率は「国際スポット → 国内店頭価格」の差を埋めるための補正です。過去の実績から逆算して設定してください。</p>
   </div>
 
+  <details class="card" data-block="quote.sell">
+    <summary>見積書の設定（屋号・連絡先・既定の掛け率）</summary>
+    <div style="margin-top:12px">
+      <div class="row">
+        <div style="flex:2 1 220px"><label>屋号・氏名</label><input type="text" id="iv-name" placeholder="KOTODAMA"></div>
+        <div><label>既定の掛け率</label><input type="number" id="iv-mult" step="0.1" value="2.5"></div>
+        <div><label>既定の有効期限（日）</label><input type="number" id="iv-days" value="14"></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div style="flex:2 1 260px"><label>連絡先（住所・電話・メールなど／改行できます）</label>
+          <textarea id="iv-contact" rows="3" placeholder="〒000-0000 ○○県○○市…&#10;TEL 000-0000-0000&#10;mail@example.com"></textarea></div>
+        <div style="flex:2 1 260px"><label>見積書に毎回入れる文言</label>
+          <textarea id="iv-terms" rows="3" placeholder="例）お支払いは銀行振込にてお願いいたします。&#10;例）ご注文後のキャンセルはお受けできません。"></textarea></div>
+      </div>
+      <p class="note">ここで入れた内容が見積書の発行者欄と備考に入ります。ロゴも自動で入ります。</p>
+    </div>
+  </details>
+
   <div class="card">
     <h2>意見箱</h2>
     <p class="note" style="margin-top:0">使ってみて困ったこと、欲しい機能、数値の間違いなど、ひとことでも助かります。</p>
@@ -686,7 +786,7 @@ const K = { p:'jw_prices', h:'jw_hist', c:'jw_casters', s:'jw_settings',
             m:'jw_market', src:'jw_src',
             aOver:'jw_alloy_over', aHide:'jw_alloy_hide', aAdd:'jw_alloy_add',
             prof:'jw_profile', blocks:'jw_blocks', jobs:'jw_jobs',
-            nOver:'jw_note_over', nHide:'jw_note_hide', nAdd:'jw_note_add',
+            nOver:'jw_note_over', nHide:'jw_note_hide', nAdd:'jw_note_add', inv:'jw_invoice',
             migrated:'jw_migrated' };
 
 const DB = (()=>{
@@ -922,6 +1022,7 @@ const BLOCKS = [
   {id:'tab.jobs',    g:'綴じ',         n:'手控（作業の記録）'},
   {id:'tab.notes',   g:'綴じ',         n:'覚書（調べもの）'},
   {id:'jobs.stats',  g:'手控',         n:'実測から出た換算倍率'},
+  {id:'quote.sell',  g:'工賃',         n:'見積書づくり'},
   {id:'price.chart', g:'相場',           n:'推移グラフ'},
   {id:'price.alloy', g:'相場',           n:'素材別の地金単価'},
   {id:'price.manual',g:'相場',           n:'手動での相場登録'},
@@ -934,7 +1035,7 @@ const PROFILES = {
   cad:     {n:'CAD中心',        d:'3Dデータから体積が出るので、ワックス重量からの換算は隠します', off:['calc.wax']},
   wax:     {n:'ワックス原型',   d:'ワックスから鋳造する流れ。すべて表示します',                  off:[]},
   hand:    {n:'彫金（地金から）',d:'鋳造を使わないので、工賃と鋳造屋を隠します',              off:['tab.quote','caster.list','calc.wax','calc.ref','jobs.stats']},
-  engrave: {n:'彫り',           d:'相場の確認と作業記録が中心。計算まわりを隠します',            off:['tab.quote','caster.list','tab.calc','jobs.stats']},
+  engrave: {n:'彫り',           d:'相場の確認と作業記録が中心。計算まわりを隠します',            off:['tab.quote','caster.list','tab.calc','jobs.stats','quote.sell']},
   all:     {n:'すべて表示',     d:'制限なし',                                                    off:[]},
 };
 const profile = () => PROFILES[load(K.prof,'wax')] ? load(K.prof,'wax') : 'wax';
@@ -970,7 +1071,7 @@ function renderProfile(){
     `<button data-p="${k}" class="${profile()===k?'on':''}">${p.n}</button>`).join('');
   $$('#profile-chip button').forEach(b=> b.onclick = ()=>{
     save(K.prof, b.dataset.p); save(K.blocks, {});   // タイプを変えたら個別調整はリセット
-    renderProfile(); renderBlocks(); applyBlocks();
+    renderInvoiceSettings(); renderProfile(); renderBlocks(); applyBlocks();
   });
   $('#profile-note').textContent = PROFILES[profile()].d + '。下の「表示する機能」で個別に足し引きできます。';
 }
@@ -1004,7 +1105,7 @@ function askProfile(){
   document.body.appendChild(d);
   d.querySelectorAll('#ask-chip button').forEach(b=> b.onclick = ()=>{
     save(K.prof, b.dataset.p); d.remove();
-    renderProfile(); renderBlocks(); applyBlocks();
+    renderInvoiceSettings(); renderProfile(); renderBlocks(); applyBlocks();
   });
   d.querySelector('#ask-note').textContent = '';
 }
@@ -2072,6 +2173,10 @@ function renderQuote(){
     tb.appendChild(tr);
   });
   const b = rows.filter(r=>!r.noRate)[0];
+  /* 見積書に渡す値（最安の業者の条件で確定させる） */
+  lastQuote = b ? { alloyName:a.name, qty, wProd:b.wProd, wTot:b.wTot,
+                    metalCost:b.metalCost, fee:b.fee, extra, my, caster:b.c.name } : null;
+  renderSell();
   $('#q-detail').innerHTML = !b ? '—' : `
     <table><tbody>
       <tr><td>素材 / 個数</td><td>${esc(a.name)} × ${qty}個</td></tr>
@@ -2090,6 +2195,110 @@ function renderQuote(){
       <tr><td>1個あたり（税込）</td><td class="num">${yen(b.tot/qty)}</td></tr>
     </tbody></table>`;
 }
+/* ===================== 売価と見積書 =====================
+   原価（地金＋鋳造＋外注＋石代）に掛け率をかけて商品代金にする。
+   デザイン料と送料は自分の取り分・実費なので掛け率をかけずに加算する。 */
+let lastQuote = null;                      // 直近の見積内容（見積書に渡す）
+
+function sellPrice(){
+  if(!lastQuote) return null;
+  const q = lastQuote;
+  const mult  = val('#s-mult') || 1;
+  const round = parseInt($('#s-round').value) || 1;
+  const stone = val('#s-stone') * q.qty;        // 石代（実費・掛け率の対象）
+  const ship  = val('#s-ship');                 // 送料・梱包（そのまま）
+  const design= q.my * q.qty;                   // デザイン料（そのまま）
+
+  const cost  = q.metalCost + q.fee + q.extra*q.qty + stone;   // 掛け率をかける原価
+  const raw   = cost * mult;
+  const goods = Math.ceil(raw / round) * round;                 // 端数は切り上げ
+  const sub   = goods + design + ship;
+  const tax   = sub * (settings.tax||0)/100;
+  return { mult, round, stone, ship, design, cost, raw, goods, sub, tax, total: sub+tax };
+}
+function renderSell(){
+  const s = sellPrice(), el = $('#s-calc');
+  if(!s || !lastQuote){ el.innerHTML = '先に素材と重量を入れてください。'; return; }
+  const q = lastQuote;
+  el.innerHTML = `
+    原価 <b>${yen(s.cost)}</b>（地金 ${yen(q.metalCost)} ＋ 鋳造 ${yen(q.fee)}
+    ${q.extra?` ＋ 外注 ${yen(q.extra*q.qty)}`:''}${s.stone?` ＋ 石代 ${yen(s.stone)}`:''}）
+    → ×${num(s.mult,1)} ＝ ${yen(s.raw)} → 丸めて <b>商品代金 ${yen(s.goods)}</b>
+    ${s.design?`<br>＋ デザイン料 ${yen(s.design)}`:''}${s.ship?`　＋ 送料・梱包 ${yen(s.ship)}`:''}
+    <br><span style="font-size:15px">合計（税込）<b>${yen(s.total)}</b>
+    　<span style="opacity:.75">1個あたり ${yen(s.total/q.qty)}／粗利 ${yen(s.goods - s.cost)}</span></span>`;
+}
+['#s-mult','#s-round','#s-stone','#s-ship'].forEach(x=>{
+  $(x).addEventListener('input', renderSell); $(x).addEventListener('change', renderSell);
+});
+
+function invoiceHTML(){
+  const s = sellPrice(), q = lastQuote;
+  const iv = load(K.inv, {});
+  const today0 = new Date();
+  const exp = new Date(today0); exp.setDate(exp.getDate() + (val('#s-days')||14));
+  const jd = d => d.toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'});
+  const no = today0.toISOString().slice(0,10).replace(/-/g,'') + '-' + String((load('jw_invno',0)+1)).padStart(2,'0');
+  save('jw_invno', load('jw_invno',0)+1);
+
+  const to = $('#s-to').value.trim(), hon = $('#s-hon').value;
+  const rows = [];
+  rows.push({ n:`${q.alloyName}　${$('#s-subj').value.trim()||'製作一式'}`,
+              memo:`地金重量 約${num(q.wProd,2)}g／個`, q:q.qty, u:s.goods/q.qty, a:s.goods });
+  if(s.design) rows.push({ n:'デザイン料', memo:'', q:q.qty, u:s.design/q.qty, a:s.design });
+  if(s.ship)   rows.push({ n:'送料・梱包', memo:'', q:1, u:s.ship, a:s.ship });
+
+  const notes = [
+    `本見積は ${prices.date||jd(today0)} 時点の地金相場に基づいています。`,
+    `地金相場の変動により、有効期限を過ぎた場合は再度お見積りいたします。`,
+    `記載の重量は概算です。仕上がりにより多少前後します。`,
+    $('#s-note').value.trim(), (iv.terms||'').trim()
+  ].filter(Boolean).join('\n');
+
+  return `
+    <h1 class="ttl">御見積書</h1>
+    <div class="head">
+      <div class="to">
+        <div class="nm">${to?esc(to)+' '+esc(hon):'&nbsp;'}</div>
+        <div>下記のとおりお見積り申し上げます。</div>
+      </div>
+      <div class="from">
+        <svg class="lg" viewBox="180.15 285.08 224.73 224.73" fill="currentColor">${
+          $('#logo').innerHTML}</svg>
+        <b>${esc(iv.name||'')}</b>\n${esc(iv.contact||'')}
+      </div>
+    </div>
+    <div class="sum">御見積金額 <span class="amt">${yen(s.total)}</span>
+      <span style="font-size:11px">（税込）</span></div>
+    <table>
+      <thead><tr><th style="width:46%">品名・仕様</th><th style="width:12%">数量</th>
+        <th style="width:21%">単価</th><th style="width:21%">金額</th></tr></thead>
+      <tbody>
+        ${rows.map(r=>`<tr><td>${esc(r.n)}${r.memo?`<br><span style="font-size:11px;color:#666">${esc(r.memo)}</span>`:''}</td>
+          <td class="c">${r.q}</td><td class="r">${yen(r.u)}</td><td class="r">${yen(r.a)}</td></tr>`).join('')}
+        ${'<tr><td colspan="4" style="border:none;height:6px"></td></tr>'}
+        <tr><td colspan="3" class="r">小計</td><td class="r">${yen(s.sub)}</td></tr>
+        <tr><td colspan="3" class="r">消費税（${settings.tax}%）</td><td class="r">${yen(s.tax)}</td></tr>
+        <tr class="tot"><td colspan="3" class="r">合計</td><td class="r">${yen(s.total)}</td></tr>
+      </tbody>
+    </table>
+    <dl class="meta">
+      <dt>見積番号</dt><dd>${no}</dd>
+      <dt>発行日</dt><dd>${jd(today0)}</dd>
+      <dt>有効期限</dt><dd>${jd(exp)}</dd>
+      ${$('#s-lead').value.trim()?`<dt>納期の目安</dt><dd>${esc($('#s-lead').value.trim())}</dd>`:''}
+    </dl>
+    <div class="rem">${esc(notes)}</div>`;
+}
+$('#make-invoice').onclick = ()=>{
+  if(!lastQuote){ alert('先に素材と重量を入れてください'); return; }
+  $('#invoice').innerHTML = invoiceHTML();
+  $('#inv-wrap').classList.remove('hide');
+  document.body.style.overflow='hidden';
+};
+$('#inv-close').onclick = ()=>{ $('#inv-wrap').classList.add('hide'); document.body.style.overflow=''; };
+$('#inv-print').onclick = ()=> window.print();
+
 $$('#q-mode button').forEach(b=> b.onclick = ()=>{
   $$('#q-mode button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); renderQuote();
 });
@@ -2178,6 +2387,18 @@ $('#reset-alloy').onclick = ()=>{
   drop(K.aOver); drop(K.aHide);
   refreshAlloys(); renderSettings(); fillAlloySelects(); renderAlloyPrice(); renderWeights(); renderQuote();
 };
+/* 見積書の発行者設定 */
+function renderInvoiceSettings(){
+  const iv = load(K.inv, {mult:2.5, days:14});
+  $('#iv-name').value = iv.name||''; $('#iv-contact').value = iv.contact||'';
+  $('#iv-terms').value = iv.terms||''; $('#iv-mult').value = iv.mult||2.5; $('#iv-days').value = iv.days||14;
+  $('#s-mult').value = iv.mult||2.5; $('#s-days').value = iv.days||14;   // 見積欄の既定値にも反映
+}
+['#iv-name','#iv-contact','#iv-terms','#iv-mult','#iv-days'].forEach(x=> $(x).onchange = ()=>{
+  save(K.inv, { name:$('#iv-name').value.trim(), contact:$('#iv-contact').value.trim(),
+                terms:$('#iv-terms').value.trim(), mult:val('#iv-mult')||2.5, days:val('#iv-days')||14 });
+  renderSell();
+});
 $('#st-tax').onchange = ()=>{ settings.tax = val('#st-tax'); save(K.s,settings); renderQuote(); };
 $('#st-margin').onchange = ()=>{ settings.margin = val('#st-margin'); save(K.s,settings); syncPrices(); };
 
@@ -2245,7 +2466,7 @@ async function initRender(){
   $('#price-date').textContent = d;
   fillAlloySelects(); renderShapeFields(); renderCasters(); renderJobs(); renderNotes();
   renderSettings(); renderBackupNote();
-  renderProfile(); renderBlocks(); applyBlocks();
+  renderInvoiceSettings(); renderProfile(); renderBlocks(); applyBlocks();
   syncPrices();          // 保存済みデータで即描画
   fetchMarket();         // その裏で最新を取得（1日1回）
 }
