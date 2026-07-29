@@ -194,6 +194,18 @@ hr{border:none;border-top:1px solid var(--line);margin:12px 0}
 details.card>summary{cursor:pointer;font-size:14px;color:var(--muted);font-weight:600;letter-spacing:.04em;list-style:none}
 details.card>summary::before{content:'▸ ';font-size:11px}
 details.card[open]>summary::before{content:'▾ '}
+/* カードの中の折りたたみ。注記と見分けがつくよう、枠と太字で操作部品に見せる */
+details.fold{border:1px solid var(--line);border-radius:8px;background:var(--bg);margin-top:12px}
+details.fold>summary{cursor:pointer;list-style:none;padding:11px 13px;
+  font-size:14px;font-weight:600;color:var(--fg);display:flex;align-items:center;gap:9px}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary::before{content:'▸';font-size:11px;color:var(--accent);width:10px;flex:none}
+details.fold[open]>summary::before{content:'▾'}
+details.fold[open]>summary{border-bottom:1px solid var(--line)}
+details.fold>summary:hover{color:var(--accent)}
+details.fold>*:not(summary){margin-left:13px;margin-right:13px}
+details.fold>summary+*{margin-top:12px}
+details.fold[open]{padding-bottom:12px}
 .sw{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin:0;cursor:pointer}
 .sw input{width:auto}
 .spin{display:inline-block;width:11px;height:11px;border:2px solid var(--line);border-top-color:var(--accent);
@@ -457,8 +469,8 @@ details.card[open]>summary::before{content:'▾ '}
     </div>
     <p class="note" id="s-calc" style="margin-top:10px"></p>
 
-    <details style="margin-top:8px">
-      <summary style="cursor:pointer;font-size:13px;color:var(--muted)">宛名・件名など、見積書に載せる内容</summary>
+    <details class="fold">
+      <summary>宛名・件名など、見積書に載せる内容</summary>
       <div class="row" style="margin-top:8px">
         <div style="flex:2 1 220px"><label>宛名</label><input type="text" id="s-to" placeholder="山田 太郎"></div>
         <div><label>敬称</label><select id="s-hon">
@@ -556,8 +568,8 @@ details.card[open]>summary::before{content:'▾ '}
       <div><label>個数</label><input type="number" id="jf-qty" value="1" min="1"></div>
     </div>
 
-    <details style="margin-top:12px" id="jf-numbers">
-      <summary style="cursor:pointer;font-size:13px;color:var(--muted)">実績の数値を記録する（鋳造に出した場合）</summary>
+    <details class="fold" id="jf-numbers">
+      <summary>実績の数値を記録する（鋳造に出した場合）</summary>
       <div class="row" style="margin-top:8px">
         <div><label>ワックス原型の重量 (g)</label><input type="number" id="jf-wax" step="0.01"></div>
         <div><label>見積時の予想重量 (g)</label><input type="number" id="jf-est" step="0.01"></div>
@@ -654,12 +666,12 @@ details.card[open]>summary::before{content:'▾ '}
       <div><label>1個あたり最低工賃 (円)</label><input type="number" id="cf-piecemin" value="0"></div>
       <div><label>手数料・送料 (円/1オーダー)</label><input type="number" id="cf-setup" value="0"></div>
     </div>
-    <details style="margin-top:10px">
-      <summary style="cursor:pointer;font-size:13px;color:var(--muted)">金種別の単価を個別指定（任意・空欄は上の単価を使用）</summary>
+    <details class="fold">
+      <summary>金種別の単価を個別指定（任意・空欄は上の単価を使用）</summary>
       <div class="row" id="cf-alloy-rates" style="margin-top:8px"></div>
     </details>
-    <details style="margin-top:10px">
-      <summary style="cursor:pointer;font-size:13px;color:var(--muted)">ワックス1gあたりの上がり重量（任意・その店の公表倍率）</summary>
+    <details class="fold">
+      <summary>ワックス1gあたりの上がり重量（任意・その店の公表倍率）</summary>
       <div class="row" id="cf-wax" style="margin-top:8px"></div>
       <p class="note">鋳造屋が公表している「WAX1gに対する目安」を入れてください。湯口の残りや形状を織り込んだ実務値のため、
         理論比重（ワックス比重で割った値）より大きいのが普通です。空欄の金種は理論値で計算します。</p>
