@@ -1,0 +1,1819 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>金工手帖</title>
+<style>
+:root{
+  --bg:#f6f4ef; --card:#fff; --fg:#26221c; --muted:#7d766a;
+  --line:#e2ddd2; --accent:#a8802a; --accent-soft:#f3e9d2;
+  --pt:#5f7d8c; --sv:#8a8a8a; --pd:#8d7fa5; --danger:#b5432f;
+  --radius:12px;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#17150f; --card:#211e18; --fg:#ece7dc; --muted:#9d9587;
+         --line:#332e25; --accent:#d6ab52; --accent-soft:#3a3020; }
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic UI",Meiryo,sans-serif;
+     background:var(--bg);color:var(--fg);font-size:15px;line-height:1.6}
+header{padding:10px 16px;border-bottom:1px solid var(--line);background:var(--card);
+       display:flex;align-items:center;gap:11px;position:sticky;top:0;z-index:10}
+header #logo{width:38px;height:38px;flex:none;display:block;color:var(--fg)}
+header .brand{display:flex;flex-direction:column;gap:1px;min-width:0}
+header h1{font-size:19px;margin:0;letter-spacing:.14em;font-weight:600;line-height:1.15}
+header .sub{color:var(--muted);font-size:10px;letter-spacing:.22em}
+nav{display:flex;gap:4px;padding:8px 12px 0;background:var(--card);border-bottom:1px solid var(--line);
+    overflow-x:auto;position:sticky;top:53px;z-index:9}
+nav button{background:none;border:none;border-bottom:2px solid transparent;padding:8px 14px;
+     font-size:14px;color:var(--muted);cursor:pointer;white-space:nowrap;font-family:inherit}
+nav button.on{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+main{max-width:960px;margin:0 auto;padding:16px 12px 60px}
+section{display:none} section.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:14px}
+.card h2{font-size:14px;margin:0 0 10px;letter-spacing:.04em;color:var(--muted);font-weight:600}
+.card h2.hero{font-size:20px;color:var(--fg);letter-spacing:.01em;margin-bottom:14px;
+  display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.card h2.hero .unit{font-size:13px;color:var(--muted);font-weight:400;letter-spacing:.02em}
+.card.handoff{border-color:var(--accent);background:linear-gradient(var(--accent-soft),var(--card))}
+.card.handoff h2{color:var(--accent)}
+.card h2.hero #price-date{font-size:20px;color:var(--accent)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>*{flex:1 1 160px;min-width:0}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:3px}
+input,select,textarea{width:100%;padding:8px 9px;border:1px solid var(--line);border-radius:8px;
+  background:var(--bg);color:var(--fg);font-size:15px;font-family:inherit}
+textarea{resize:vertical;min-height:80px;line-height:1.65;font-size:14px}
+textarea::placeholder{color:var(--muted);opacity:.65}
+.caster .memo{white-space:pre-wrap;font-size:13px;color:var(--fg);margin-top:8px;
+  padding:8px 10px;background:var(--card);border-radius:8px;border:1px solid var(--line)}
+.caster details.memo>summary{cursor:pointer;color:var(--muted);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;list-style:none}
+.caster details.memo>summary::before{content:'▸ ';font-size:10px}
+.caster details.memo[open]>summary{white-space:normal}
+.caster details.memo[open]>summary::before{content:'▾ '}
+.caster details.memo .body{white-space:pre-wrap;margin-top:6px}
+.photos{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.photos figure{margin:0;position:relative;width:88px;height:88px;border:1px solid var(--line);
+  border-radius:8px;overflow:hidden;background:var(--bg)}
+.photos img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
+.photos .rm{position:absolute;top:2px;right:2px;width:20px;height:20px;line-height:18px;padding:0;
+  border-radius:50%;border:none;background:rgba(0,0,0,.6);color:#fff;cursor:pointer;font-size:13px}
+.tag{font-size:10px;margin-top:3px;display:inline-block;padding:0 6px;border-radius:20px}
+.tag.edit{background:var(--accent-soft);color:var(--accent)}
+.tag.add{background:var(--line);color:var(--muted)}
+#lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;
+  justify-content:center;z-index:100;cursor:zoom-out;padding:20px}
+#lightbox img{max-width:100%;max-height:100%;object-fit:contain}
+input[type=number]{text-align:right}
+button.act{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:9px 16px;
+  font-size:14px;cursor:pointer;font-family:inherit}
+button.ghost{background:none;border:1px solid var(--line);color:var(--fg);border-radius:8px;
+  padding:7px 13px;font-size:13px;cursor:pointer;font-family:inherit}
+button.ghost:hover{border-color:var(--accent);color:var(--accent)}
+button.del{color:var(--danger);border-color:transparent;background:none;cursor:pointer;font-size:13px;font-family:inherit}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-size:12px;font-weight:600;white-space:nowrap}
+td.num{font-variant-numeric:tabular-nums}
+.scroll{overflow-x:auto}
+.price-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.pbox{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--bg)}
+.pbox .nm{font-size:14px;color:var(--muted)}
+.pbox .val{font-size:34px;font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1.25;font-weight:600}
+.pbox .val small{font-size:14px;color:var(--muted);letter-spacing:0;font-weight:400}
+.pbox.gold{border-left:4px solid var(--accent)}
+.pbox.platinum{border-left:4px solid var(--pt)}
+.pbox.silver{border-left:4px solid var(--sv)}
+.pbox.palladium{border-left:4px solid var(--pd)}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+.big{font-size:22px;font-variant-numeric:tabular-nums}
+.total{background:var(--accent-soft);border-radius:10px;padding:12px 14px;margin-top:10px}
+.total .l{font-size:12px;color:var(--muted)}
+.total .v{font-size:28px;font-variant-numeric:tabular-nums;font-weight:600}
+.pill{display:inline-block;font-size:11px;padding:1px 7px;border-radius:20px;background:var(--accent-soft);color:var(--accent)}
+.hide{display:none!important}
+.chip{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.chip button{background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:5px 12px;
+  font-size:13px;cursor:pointer;color:var(--muted);font-family:inherit}
+.chip button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.caster{border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--bg)}
+.caster h3{margin:0 0 4px;font-size:15px}
+.caster .meta{font-size:12px;color:var(--muted)}
+.best{color:var(--accent);font-weight:600}
+hr{border:none;border-top:1px solid var(--line);margin:12px 0}
+.inline{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.msg{font-size:13px;padding:8px 10px;border-radius:8px;background:var(--accent-soft);color:var(--accent);margin-top:8px}
+#chart-wrap svg{width:100%;height:auto;display:block;touch-action:none}
+#chart-read{font-size:13px;font-variant-numeric:tabular-nums;min-height:22px;margin-top:6px;color:var(--muted)}
+#chart-read b{color:var(--fg)}
+#chart-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+.lg{display:flex;align-items:center;gap:6px;font-size:13px}
+.lg i{width:14px;height:3px;border-radius:2px;display:inline-block}
+.lg .d{font-variant-numeric:tabular-nums}
+.up{color:#c0392b} .down{color:#2b7a4b}
+.grid{stroke:var(--line)} .axis{fill:var(--muted);font-size:11px}
+.plabel{fill:var(--fg);font-size:12px}
+.pbox .sub{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;min-height:18px}
+details.card>summary{cursor:pointer;font-size:14px;color:var(--muted);font-weight:600;letter-spacing:.04em;list-style:none}
+details.card>summary::before{content:'▸ ';font-size:11px}
+details.card[open]>summary::before{content:'▾ '}
+.sw{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin:0;cursor:pointer}
+.sw input{width:auto}
+.spin{display:inline-block;width:11px;height:11px;border:2px solid var(--line);border-top-color:var(--accent);
+  border-radius:50%;animation:sp .7s linear infinite;vertical-align:-1px;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<header>
+  <svg id="logo" viewBox="180.15 285.08 224.73 224.73" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M292.5142,509.8065 C279.3006,509.8234 264.9764,507.4119 251.154,501.9174 C237.3315,496.4229 224.0108,487.8454 213.0616,476.8962 C202.1125,465.9471 193.535,452.6263 188.0405,438.8039 C182.546,424.9814 180.1345,410.6573 180.1513,397.4437 C180.1345,384.2302 182.546,369.906 188.0405,356.0836 C193.535,342.2611 202.1125,328.9403 213.0616,317.9912 C224.0108,307.0421 237.3315,298.4646 251.154,292.9701 C264.9764,287.4756 279.3006,285.064 292.5142,285.0809 C305.7277,285.064 320.0519,287.4756 333.8743,292.9701 C347.6968,298.4646 361.0175,307.0421 371.9667,317.9912 C382.9158,328.9403 391.4933,342.2611 396.9878,356.0836 C402.4823,369.906 404.8939,384.2302 404.877,397.4437 C404.8939,410.6573 402.4823,424.9814 396.9878,438.8039 C391.4933,452.6263 382.9158,465.9471 371.9667,476.8962 C361.0175,487.8454 347.6968,496.4229 333.8743,501.9174 C320.0519,507.4119 305.7277,509.8234 292.5142,509.8065 z M292.5142,503.1745 C304.9478,503.1904 318.4265,500.9212 331.4331,495.751 C344.4397,490.5808 356.9742,482.5096 367.2771,472.2067 C377.58,461.9038 385.6512,449.3693 390.8214,436.3627 C395.9916,423.356 398.2608,409.8774 398.245,397.4437 C398.2608,385.0101 395.9916,371.5314 390.8214,358.5248 C385.6512,345.5182 377.58,332.9836 367.2771,322.6808 C356.9742,312.3779 344.4397,304.3067 331.4331,299.1365 C318.4265,293.9662 304.9478,291.6971 292.5142,291.7129 C280.0805,291.6971 266.6018,293.9662 253.5952,299.1365 C240.5886,304.3067 228.0541,312.3779 217.7512,322.6808 C207.4483,332.9836 199.3771,345.5182 194.2069,358.5248 C189.0367,371.5314 186.7675,385.0101 186.7834,397.4437 C186.7675,409.8774 189.0367,423.356 194.2069,436.3627 C199.3771,449.3693 207.4483,461.9038 217.7512,472.2067 C228.0541,482.5096 240.5886,490.5808 253.5952,495.751 C266.6018,500.9212 280.0805,503.1904 292.5142,503.1745 z" stroke="none" stroke-width="0" fill="currentColor" fill-opacity="1" />
+    <path d="M280.4979,420.1152 C281.7468,409.6901 285.3472,404.8365 288.9712,401.4017 C292.5952,397.967 296.2429,395.9511 299.3413,394.1555 C305.6351,390.717 309.9601,388.5201 313.2299,386.0945 C316.4917,383.7346 318.9018,381.3078 320.5417,378.6178 C322.1742,375.9568 322.9142,373.1241 322.7171,371.0934 C322.5373,369.0368 321.4568,367.8041 320.0831,367.1694 C318.718,366.5641 316.9926,366.3987 315.3899,367.4435 C314.6223,367.9705 313.8212,368.8995 313.5369,370.26 C313.2526,371.6206 313.485,373.4125 316.3827,374.4262 C313.0275,375.462 309.8229,373.5811 308.4949,371.3991 C307.1669,369.2172 307.7155,366.7343 308.2328,365.1177 C309.402,361.8498 311.8647,359.7004 314.914,358.4796 C317.9559,357.3005 321.5725,357.4774 324.682,358.6493 C327.8017,359.8172 330.3975,361.9597 331.8282,365.1635 C333.2754,368.3352 333.4996,372.5702 332.0691,376.5698 C330.6783,380.5948 327.6749,384.2516 324.1018,387.2248 C320.5188,390.2319 316.4303,392.6222 312.2487,395.0277 C308.0709,397.4315 303.745,399.9193 299.9546,403.0461 C296.155,406.1572 292.9875,409.8811 290.9716,414.224 C288.9123,418.6007 288.0049,423.4276 287.3569,429.5166 C286.4975,436.9207 286.8108,439.4658 283.4456,463.7597 L298.6153,463.7598 C295.8328,454.8604 293.8837,448.2657 293.6574,442.8555 C293.4312,437.4453 294.9277,433.2197 296.436,431.1245 C299.327,435.8833 309.6951,446.5309 324.6897,461.3936 C312.0703,475.8112 301.6669,486.2114 290.3078,496.4988 C278.9486,486.2114 268.5453,475.8112 255.9258,461.3936 C275.2623,438.5061 269.5957,444.5002 272.5591,440.3387 C279.7633,427.535 275.6274,421.1313 271.1362,415.4662 C267.5757,411.4647 263.3577,408.7601 259.4095,406.3645 L252.6688,402.4481 C246.3471,398.817 238.7139,394.3705 232.7268,387.9213 C226.7034,381.5691 222.8386,373.4301 221.5031,365.5524 C220.1261,357.6446 221.0215,350.1224 223.7732,343.4534 C226.5318,336.793 231.188,330.838 237.6711,326.6115 C244.1293,322.4159 252.4642,319.9619 261.791,321.0554 C267.2006,321.7941 273.0475,323.3119 278.5898,327.7839 C281.7141,330.9037 285.6522,333.6906 286.1556,344.1612 C288.4875,336.7982 289.1073,335.7145 291.0625,332.2083 C293.5264,328.0505 297.4099,323.2411 302.5529,319.3874 C307.6687,315.5228 313.9159,312.8493 320.4757,312.0182 C327.0337,311.1674 333.9459,312.0495 340.5437,314.876 C347.1177,317.6837 353.3632,322.5673 357.6757,329.5374 C362.0234,336.4456 364.2531,345.3657 363.725,353.9898 C363.2555,362.6492 360.185,370.8336 356.0103,377.6649 C351.8018,384.5475 346.5483,390.122 340.1241,394.7924 C333.7138,399.5015 326.0215,403.3337 317.7322,407.8133 C313.6185,410.07 309.2451,412.4553 305.1479,415.3736 C301.0507,418.2918 297.2296,421.7431 296.5565,427.0379 C293.2726,421.6765 294.3711,418.3817 296.0817,415.5516 C297.7924,412.7216 300.1152,410.3565 302.5417,408.1724 C307.4193,403.8282 313.4734,400.5115 318.4504,397.7669 C323.4861,395.0169 327.2845,392.8074 330.4195,390.4562 C333.5517,388.117 336.192,385.6212 338.1426,382.7231 C340.0887,379.839 341.3069,376.5316 341.827,372.8143 C342.3394,369.1185 342.1209,365.0424 340.6517,361.3859 C339.2143,357.7236 336.481,354.5123 333.1105,352.1936 C329.7469,349.8657 325.8407,348.461 322.1476,348.3713 C318.4424,348.2536 314.9301,349.4386 311.943,351.2914 C308.9488,353.1492 306.5162,355.6106 304.9778,358.3588 C303.3932,361.1151 302.785,364.1826 302.1229,367.4246 C301.4151,370.6148 300.5638,374.2537 297.1374,377.2581 C293.8139,379.8639 287.3566,383.0217 277.5052,375.9412 C283.8303,376.2502 287.4628,373.3667 289.8186,371.1604 C292.1695,368.7603 293.2968,366.0946 294.4029,362.94 C295.4893,359.808 296.5734,356.1726 298.3484,352.8118 C300.0968,349.4424 302.535,346.4065 305.5824,343.9847 C308.6186,341.5586 312.2058,339.719 315.9241,338.7569 C319.6471,337.7885 323.5204,337.711 327.4179,338.5866 C331.2993,339.454 335.2297,341.283 338.4932,343.9612 C341.7478,346.6754 344.3098,349.989 345.296,354.2847 C345.4947,346.631 342.3813,341.2057 337.3134,336.7574 C332.7003,332.789 327.087,330.8154 321.891,330.6838 C316.6549,330.524 311.7349,331.977 307.4455,334.2114 C303.1394,336.461 299.5039,339.5917 296.657,343.6412 C293.7782,347.6555 291.6276,352.5528 289.0464,356.7415 C286.4873,360.9573 283.4457,364.4122 279.7887,366.9012 C276.1339,369.3571 271.9092,371.0296 266.7733,370.5518 C264.2477,370.2639 261.3016,369.5383 258.6095,367.5442 C255.9174,365.5502 253.4793,362.2878 255.5888,354.3497 C256.1931,359.1712 260.3586,361.274 263.7882,361.4504 C267.3685,361.624 270.8412,359.6945 272.9832,356.8259 C275.1592,353.9646 275.9453,350.2434 274.8962,346.9977 C273.8961,343.7291 271.118,340.9763 267.7742,339.414 C264.421,337.8245 260.6071,337.3974 257.0385,337.9995 C253.454,338.5956 250.0685,340.18 247.1599,342.5104 C244.2498,344.8397 241.8123,347.9359 240.1467,351.5759 C238.475,355.2074 237.5842,359.3733 237.5691,363.5221 C237.548,367.679 238.4021,371.7802 240.0894,375.544 C241.7721,379.3212 244.2735,382.7779 247.3793,386.032 C250.4833,389.2908 254.2149,392.3527 258.4226,395.4018 C262.6074,398.4827 267.3054,401.424 271.6571,405.1118 C275.7605,408.5914 280.6158,414.257 280.4979,420.1152 z M298.2403,469.5964 L283.8206,469.5964 L290.3435,483.3474 z M313.9053,466.8011 L304.7982,469.5964 L297.2964,482.5037 z M266.7102,466.8011 L283.3191,482.5037 L275.8173,469.5964 z M267.1078,460.2944 C270.0536,461.4002 272.7653,462.1898 276.2015,463.0896 C278.3499,453.6994 280.0101,445.4358 281.1823,438.2987 C279.8131,443.2729 274.5043,451.1074 267.1078,460.2944 z M314.2856,460.2944 C308.3022,453.5966 303.031,448.1808 300.6201,445.2736 C301.2193,450.2007 302.9658,456.1393 305.8594,463.0897 z" stroke="none" stroke-width="0" fill="currentColor" fill-opacity="1" />
+  </svg>
+  <div class="brand">
+    <h1>金工手帖</h1>
+    <span class="sub">相場・見積・記録</span>
+  </div>
+</header>
+
+<nav>
+  <button data-t="price" class="on">相場</button>
+  <button data-t="calc"   data-block="tab.calc">体積・重量</button>
+  <button data-t="quote"  data-block="tab.quote">工賃見積</button>
+  <button data-t="jobs"   data-block="tab.jobs">記録</button>
+  <button data-t="settings">設定</button>
+</nav>
+
+<main>
+
+<!-- ============ 相場 ============ -->
+<section id="price" class="on">
+  <div class="card">
+    <h2 class="hero"><span id="price-date"></span><span>本日の地金相場</span><span class="unit">（円 / g・純度100%換算）</span><span class="pill" id="src-pill"></span></h2>
+    <div class="price-grid">
+      <div class="pbox gold">
+        <div class="nm">金 (Au)</div>
+        <div class="val"><span id="v-gold">-</span> <small>円/g</small></div>
+        <div class="sub" id="c-gold"></div>
+      </div>
+      <div class="pbox platinum">
+        <div class="nm">プラチナ (Pt)</div>
+        <div class="val"><span id="v-platinum">-</span> <small>円/g</small></div>
+        <div class="sub" id="c-platinum"></div>
+      </div>
+      <div class="pbox silver">
+        <div class="nm">銀 (Ag)</div>
+        <div class="val"><span id="v-silver">-</span> <small>円/g</small></div>
+        <div class="sub" id="c-silver"></div>
+      </div>
+      <div class="pbox palladium">
+        <div class="nm">パラジウム (Pd)</div>
+        <div class="val"><span id="v-palladium">-</span> <small>円/g</small></div>
+        <div class="sub" id="c-palladium"></div>
+      </div>
+    </div>
+    <p class="note" id="price-meta"></p>
+    <div id="fetch-msg"></div>
+    <div class="inline" style="margin-top:10px">
+      <button class="ghost" id="reload">最新に更新</button>
+      <label class="sw"><input type="checkbox" id="use-manual"> 自動取得ではなく、手動登録した相場を使う</label>
+    </div>
+  </div>
+
+  <div class="card" data-block="price.chart">
+    <h2>推移</h2>
+    <div class="chip" id="period-chip">
+      <button data-p="1" class="on">1ヶ月</button><button data-p="3">3ヶ月</button>
+      <button data-p="6">6ヶ月</button><button data-p="12">1年</button>
+      <button data-p="36">3年</button><button data-p="60">5年</button>
+      <button data-p="120">10年</button><button data-p="0">全期間</button>
+    </div>
+    <div class="chip" id="cmode-chip">
+      <button data-c="actual" class="on">実額（円/g）</button>
+      <button data-c="index">指数（起点=100・値動きを比較）</button>
+    </div>
+    <div id="chart-wrap"></div>
+    <div id="chart-read"></div>
+    <div id="chart-legend"></div>
+  </div>
+
+  <div class="card" data-block="price.alloy">
+    <h2>素材別の地金単価（相場 × 純度 × 係数）</h2>
+    <div class="scroll"><table id="alloy-price"><thead><tr>
+      <th>素材</th><th>比重</th><th>純度</th><th>Pd割金</th><th>係数</th><th>円/g</th>
+    </tr></thead><tbody></tbody></table></div>
+    <p class="note" id="pd-note"></p>
+  </div>
+
+  <details class="card" data-block="price.manual">
+    <summary>手動で相場を登録する（田中貴金属などの店頭価格を使う場合）</summary>
+    <div style="margin-top:12px">
+      <div class="row">
+        <div><label>金 円/g</label><input type="number" id="in-gold" step="1"></div>
+        <div><label>プラチナ 円/g</label><input type="number" id="in-platinum" step="1"></div>
+        <div><label>銀 円/g</label><input type="number" id="in-silver" step="0.1"></div>
+        <div><label>パラジウム 円/g</label><input type="number" id="in-palladium" step="1"></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div><label>基準日</label><input type="date" id="in-date"></div>
+        <div><label>出典メモ</label><input type="text" id="in-src" placeholder="例：田中貴金属 店頭小売価格"></div>
+      </div>
+      <div class="inline" style="margin-top:12px">
+        <button class="act" id="save-price">この相場を保存</button>
+        <button class="ghost" id="csv">表示中の期間をCSVで書き出し</button>
+      </div>
+      <p class="note">
+        国内の店頭小売価格は業者マージン・税を含むため、自動取得のロンドン基準値とは差が出ます。
+        店頭価格で計算したい場合はここに登録し、上の「手動登録した相場を使う」をオンにしてください。参考：
+        <a href="https://gold.tanaka.co.jp/commodity/souba/" target="_blank" rel="noopener">田中貴金属</a> /
+        <a href="https://www.ishifukumetal.co.jp/market/" target="_blank" rel="noopener">石福金属</a>
+      </p>
+      <h2 style="margin-top:16px">登録済み <span class="pill" id="hist-count"></span></h2>
+      <div class="scroll" style="max-height:300px;overflow-y:auto"><table id="hist"><thead><tr>
+        <th>日付</th><th>金</th><th>プラチナ</th><th>銀</th><th>パラジウム</th><th>出典</th><th></th>
+      </tr></thead><tbody></tbody></table></div>
+    </div>
+  </details>
+</section>
+
+<!-- ============ 体積・重量 ============ -->
+<section id="calc">
+  <div class="card">
+    <h2>体積の求め方</h2>
+    <div class="chip" id="mode-chip">
+      <button data-m="vol" data-block="calc.vol" class="on">体積を直接入力</button>
+      <button data-m="wax" data-block="calc.wax">ワックス原型の重量から</button>
+      <button data-m="ref" data-block="calc.ref">他素材の重量から</button>
+      <button data-m="shape" data-block="calc.shape">形状から計算</button>
+    </div>
+
+    <div id="m-vol">
+      <div class="row">
+        <div><label>体積</label><input type="number" id="vol-in" step="0.001" placeholder="0"></div>
+        <div><label>単位</label><select id="vol-unit">
+          <option value="1000">mm³</option><option value="1">cm³ (cc)</option></select></div>
+      </div>
+    </div>
+
+    <div id="m-wax" class="hide">
+      <div class="row">
+        <div><label>ワックス原型の重量 (g)</label><input type="number" id="wax-g" step="0.01"></div>
+        <div><label>ワックス比重</label><input type="number" id="wax-d" step="0.01" value="0.95"></div>
+      </div>
+      <p class="note">カービングワックス 0.90〜1.00 / 青ワックス 約1.00 / インジェクションワックス 約0.95。3Dプリント樹脂は 1.10〜1.20 程度。</p>
+    </div>
+
+    <div id="m-ref" class="hide">
+      <div class="row">
+        <div><label>原型・現物の素材</label><select id="ref-alloy"></select></div>
+        <div><label>その重量 (g)</label><input type="number" id="ref-g" step="0.01"></div>
+      </div>
+      <p class="note">例：シルバーで作った原型 10g → 同じ形をK18で作ると何gか、が分かります。</p>
+    </div>
+
+    <div id="m-shape" class="hide">
+      <div class="row">
+        <div><label>形状</label><select id="shape-kind">
+          <option value="ring-flat">リング・平打ち（角断面）</option>
+          <option value="ring-round">リング・甲丸（半円断面）</option>
+          <option value="ring-wire">リング・丸線</option>
+          <option value="cyl">円柱 / 丸棒</option>
+          <option value="box">直方体</option>
+          <option value="sphere">球</option>
+          <option value="pipe">パイプ（中空円筒）</option>
+        </select></div>
+      </div>
+      <div class="row" style="margin-top:8px" id="shape-fields"></div>
+      <div class="row" style="margin-top:8px" id="ringsize-row">
+        <div><label>号数 → 内径換算</label><input type="number" id="ring-go" step="0.5" placeholder="例 11"></div>
+        <div style="display:flex;align-items:flex-end"><button class="ghost" id="go-calc" style="width:100%">内径にセット</button></div>
+      </div>
+      <p class="note">日本規格：内周(mm) = 号数 + 40、内径 = 内周 ÷ π。甲丸は同幅・同厚の平打ちの約 78.5%の体積で概算します。</p>
+    </div>
+
+    <hr>
+    <div class="row">
+      <div><label>個数</label><input type="number" id="qty" value="1" min="1" step="1"></div>
+      <div><label>湯道・ロス率 (%)</label><input type="number" id="loss" value="15" step="1"></div>
+    </div>
+    <p class="note">湯道（スプルー）分は鋳造時に必要な余分な地金。回収できる場合も、手配時の必要量として見込みます。</p>
+  </div>
+
+  <div class="card">
+    <h2>結果</h2>
+    <div class="row">
+      <div class="pbox"><div class="nm">体積（1個）</div><div class="val"><span id="r-vol">-</span> <small>cm³</small></div></div>
+      <div class="pbox"><div class="nm">合計体積（湯道込）</div><div class="val"><span id="r-vol-t">-</span> <small>cm³</small></div></div>
+    </div>
+    <div class="scroll" style="margin-top:12px">
+      <table id="wt-table"><thead><tr>
+        <th>素材</th><th>比重</th><th>製品重量/個 (g)</th><th>製品合計 (g)</th>
+        <th>湯道込合計 (g)</th><th>単価 円/g</th><th>地金代（湯道込）</th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+    <p class="note">地金代は「相場 × 純度 × 係数」による概算です。実際の仕入は地金商のスプレッド・加工手数料が加わります。</p>
+  </div>
+
+  <div class="card handoff" data-block="tab.quote">
+    <h2>この結果で鋳造の工賃を見積もる</h2>
+    <div class="row">
+      <div style="flex:2 1 220px"><label>作る素材を選ぶ</label><select id="to-alloy"></select></div>
+      <div style="display:flex;align-items:flex-end">
+        <button class="act" id="to-quote" style="width:100%">工賃を見積もる →</button>
+      </div>
+    </div>
+    <p class="note" id="to-note"></p>
+  </div>
+</section>
+
+<!-- ============ 工賃見積 ============ -->
+<section id="quote">
+  <div class="card">
+    <h2>条件</h2>
+    <div class="row">
+      <div><label>素材</label><select id="q-alloy"></select></div>
+      <div><label>個数</label><input type="number" id="q-qty" value="1" min="1"></div>
+    </div>
+    <div class="chip" id="q-mode" style="margin-top:12px">
+      <button data-m="direct" class="on">製品重量から</button>
+      <button data-m="wax" data-block="calc.wax">ワックス原型の重量から</button>
+    </div>
+    <div class="row">
+      <div><label id="q-wt-label">製品重量／個 (g)</label><input type="number" id="q-wt" step="0.01"></div>
+      <div id="q-waxd-box" class="hide"><label>ワックス比重（倍率未登録の店に使用）</label>
+        <input type="number" id="q-waxd" step="0.01" value="0.95"></div>
+      <div><label>湯道・ロス率 (%)</label><input type="number" id="q-loss" value="15"></div>
+    </div>
+    <div id="q-from" class="msg hide"></div>
+    <p class="note" id="q-mode-note"></p>
+    <div class="row" style="margin-top:8px">
+      <div><label>磨き・石留めなど (円/個)</label><input type="number" id="q-extra" value="0"></div>
+      <div><label>デザイン料 (円/個)</label><input type="number" id="q-my" value="0"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>鋳造屋ごとの比較</h2>
+    <div class="scroll"><table id="q-table"><thead><tr>
+      <th>鋳造屋</th><th>上がり重量/個 (g)</th><th>課金重量 (g)</th><th>鋳造工賃</th><th>地金代</th><th>その他</th><th>税抜計</th><th>税込計</th>
+    </tr></thead><tbody></tbody></table></div>
+    <div id="q-empty" class="note">鋳造屋がまだ登録されていません。
+      <button class="ghost" id="go-caster">設定で鋳造屋を登録する</button></div>
+  </div>
+
+  <div class="card">
+    <h2>内訳（最安の業者）</h2>
+    <div id="q-detail" class="note">—</div>
+  </div>
+</section>
+
+
+<!-- ============ 記録 ============ -->
+<section id="jobs">
+  <div class="card">
+    <h2>作業の記録 <span class="pill" id="job-count"></span></h2>
+    <div class="chip" id="job-filter"></div>
+    <div id="job-list"></div>
+    <button class="act" id="add-job" style="margin-top:10px">＋ 記録を追加</button>
+  </div>
+
+  <div class="card hide" id="job-form">
+    <h2 id="jf-title">記録の追加</h2>
+    <div class="row">
+      <div><label>日付</label><input type="date" id="jf-date"></div>
+      <div style="flex:3 1 260px"><label>タイトル</label>
+        <input type="text" id="jf-title-in" placeholder="例：甲丸リング 3mm / 個展用ペンダント"></div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div><label>素材（任意）</label><select id="jf-alloy"></select></div>
+      <div><label>鋳造屋（任意）</label><select id="jf-caster"></select></div>
+      <div><label>個数</label><input type="number" id="jf-qty" value="1" min="1"></div>
+    </div>
+
+    <details style="margin-top:12px" id="jf-numbers">
+      <summary style="cursor:pointer;font-size:13px;color:var(--muted)">実績の数値を記録する（鋳造に出した場合）</summary>
+      <div class="row" style="margin-top:8px">
+        <div><label>ワックス原型の重量 (g)</label><input type="number" id="jf-wax" step="0.01"></div>
+        <div><label>見積時の予想重量 (g)</label><input type="number" id="jf-est" step="0.01"></div>
+        <div><label>実際の上がり重量 (g)</label><input type="number" id="jf-actual" step="0.01"></div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <div><label>実際の鋳造工賃 (円・税抜)</label><input type="number" id="jf-fee" step="1"></div>
+        <div><label>見積した工賃 (円・税抜)</label><input type="number" id="jf-estfee" step="1"></div>
+      </div>
+      <p class="note" id="jf-calc"></p>
+    </details>
+
+    <div style="margin-top:12px">
+      <label>写真（原型・仕上がり・失敗の記録など）</label>
+      <div id="jf-photos" class="photos"></div>
+      <div class="inline" style="margin-top:6px">
+        <button class="ghost" id="jf-addphoto">＋ 写真を追加</button>
+        <input type="file" id="jf-photofile" accept="image/*" multiple class="hide">
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:12px">
+      <div><label>タグ（カンマ区切り）</label>
+        <input type="text" id="jf-tags" placeholder="例：ロウ付け, 石留め, 失敗"></div>
+    </div>
+    <div style="margin-top:10px">
+      <label>メモ（手順・気づき・次回への申し送り）</label>
+      <textarea id="jf-note" rows="7" placeholder="例）
+・湯回り不良が出た。断面1.0mmは薄すぎる、次は1.2mm以上
+・ロウ付けは5分ロウで問題なし
+・仕上げはペーパー#800→#1500→青バフ"></textarea>
+    </div>
+    <div class="inline" style="margin-top:12px">
+      <button class="act" id="jf-save">保存</button>
+      <button class="ghost" id="jf-cancel">キャンセル</button>
+    </div>
+  </div>
+
+  <div class="card" data-block="jobs.stats">
+    <h2>実測から出た換算倍率</h2>
+    <div class="scroll"><table id="job-stats"><thead><tr>
+      <th>鋳造屋</th><th>素材</th><th>件数</th><th>実測の倍率</th><th>公表値</th><th>差</th>
+    </tr></thead><tbody></tbody></table></div>
+    <p class="note" id="job-stats-note"></p>
+  </div>
+</section>
+
+<!-- ============ 設定 ============ -->
+<section id="settings">
+  <div class="card">
+    <h2>作り方のタイプ</h2>
+    <div class="chip" id="profile-chip"></div>
+    <p class="note" id="profile-note"></p>
+  </div>
+
+  <div class="card">
+    <h2>表示する機能</h2>
+    <div id="block-list"></div>
+    <div class="inline" style="margin-top:10px">
+      <button class="ghost" id="reset-blocks">タイプの初期状態に戻す</button>
+    </div>
+    <p class="note">使わない機能を消しても、データは残ります。あとで戻せば元どおり表示されます。</p>
+  </div>
+
+  <details class="card" data-block="caster.list">
+    <summary>鋳造屋の登録・料金設定 <span class="pill" id="caster-n"></span></summary>
+    <div style="margin-top:12px">
+  <div>
+    <h2>登録済みの鋳造屋</h2>
+    <div id="caster-list"></div>
+    <div class="inline">
+      <button class="act" id="add-caster">＋ 鋳造屋を追加</button>
+      <button class="ghost" id="seed-caster">登録例を読み込む</button>
+    </div>
+  </div>
+
+  <div class="hide" id="caster-form" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
+    <h2 id="cf-title">鋳造屋の登録</h2>
+    <div class="row">
+      <div style="flex:2 1 240px"><label>店名</label><input type="text" id="cf-name" placeholder="例：〇〇キャスト"></div>
+      <div><label>工賃の重量基準</label><select id="cf-basis">
+        <option value="product">製品重量（湯道を含まない）</option>
+        <option value="total">総重量（湯道込み）</option>
+      </select></div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div><label>金 円/g</label><input type="number" id="cf-gold" step="1" value="0"></div>
+      <div><label>プラチナ 円/g</label><input type="number" id="cf-platinum" step="1" value="0"></div>
+      <div><label>銀 円/g</label><input type="number" id="cf-silver" step="1" value="0"></div>
+      <div><label>その他 円/g</label><input type="number" id="cf-other" step="1" value="0"></div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div><label>1個あたり基本料 (円)</label><input type="number" id="cf-piece" value="0"></div>
+      <div><label>1個あたり最低工賃 (円)</label><input type="number" id="cf-piecemin" value="0"></div>
+      <div><label>手数料・送料 (円/1オーダー)</label><input type="number" id="cf-setup" value="0"></div>
+    </div>
+    <details style="margin-top:10px">
+      <summary style="cursor:pointer;font-size:13px;color:var(--muted)">金種別の単価を個別指定（任意・空欄は上の単価を使用）</summary>
+      <div class="row" id="cf-alloy-rates" style="margin-top:8px"></div>
+    </details>
+    <details style="margin-top:10px">
+      <summary style="cursor:pointer;font-size:13px;color:var(--muted)">ワックス1gあたりの上がり重量（任意・その店の公表倍率）</summary>
+      <div class="row" id="cf-wax" style="margin-top:8px"></div>
+      <p class="note">鋳造屋が公表している「WAX1gに対する目安」を入れてください。湯口の残りや形状を織り込んだ実務値のため、
+        理論比重（ワックス比重で割った値）より大きいのが普通です。空欄の金種は理論値で計算します。</p>
+    </details>
+    <div class="row" style="margin-top:10px">
+      <div><label>表示価格</label><select id="cf-tax">
+        <option value="ex">税抜</option><option value="in">税込</option></select></div>
+    </div>
+    <div style="margin-top:10px">
+      <label>写真（料金表・サンプル・仕上がりなど）</label>
+      <div id="cf-photos" class="photos"></div>
+      <div class="inline" style="margin-top:6px">
+        <button class="ghost" id="cf-addphoto">＋ 写真を追加</button>
+        <input type="file" id="cf-photofile" accept="image/*" multiple class="hide">
+        <span class="note" style="margin:0">長辺1600pxに縮小して保存します</span>
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <label>メモ（納期・条件・割引ルール・連絡先など／改行できます）</label>
+      <textarea id="cf-note" rows="7" placeholder="例）
+・納期：ワックス持込で中1営業日、3Dからは5営業日
+・上がり重量20g以上で工賃20%引き、50g以上で30%引き
+・湯道は返却なし。石枠は別途見積
+・締切：平日15時までの持込で当日着手"></textarea>
+    </div>
+    <div class="inline" style="margin-top:12px">
+      <button class="act" id="cf-save">保存</button>
+      <button class="ghost" id="cf-cancel">キャンセル</button>
+    </div>
+    <p class="note">計算式：1個の工賃 = max( 1個あたり最低工賃 , 基本料 + 課金重量 × 単価 )<br>
+      　　　　オーダー計 = 手数料 + 1個の工賃 × 個数</p>
+  </div>
+    </div>
+  </details>
+  <div class="card">
+    <h2>素材（比重・純度・係数）</h2>
+    <div class="scroll"><table id="set-alloy"><thead><tr>
+      <th>素材名</th><th>ベース</th><th>純度</th><th>Pd割金</th><th>比重</th><th>係数</th><th>固定単価 円/g</th><th></th>
+    </tr></thead><tbody></tbody></table></div>
+    <p class="note" id="alloy-hidden"></p>
+    <div class="inline" style="margin-top:10px">
+      <button class="ghost" id="add-alloy">＋ 素材を追加</button>
+      <button class="ghost" id="reset-alloy">プリセットへの変更を取り消す</button>
+    </div>
+    <p class="note">固定単価を入れた素材は、相場ではなくその値で計算します（真鍮・地金商の提示価格など）。<br>
+      使わない金種は「×」で非表示にできます。変更したところだけが保存されるので、
+      アプリを更新しても新しい金種は届き、あなたの調整は残ります。</p>
+  </div>
+
+  <div class="card">
+    <h2>全般</h2>
+    <div class="row">
+      <div><label>消費税率 (%)</label><input type="number" id="st-tax" value="10"></div>
+      <div><label>自動取得時の上乗せ (%)</label><input type="number" id="st-margin" value="0"></div>
+    </div>
+    <p class="note">上乗せ率は「国際スポット → 国内店頭価格」の差を埋めるための補正です。過去の実績から逆算して設定してください。</p>
+  </div>
+
+  <div class="card">
+    <h2>データ</h2>
+    <div class="inline">
+      <button class="ghost" id="export">バックアップを書き出し</button>
+      <button class="ghost" id="import-btn">バックアップを読み込み</button>
+      <input type="file" id="import-file" accept="application/json" class="hide">
+      <button class="del" id="wipe">全データを削除</button>
+    </div>
+    <p class="note" id="backup-note"></p>
+    <p class="note">データは端末内（IndexedDB）に保存されます。書き出しファイルには写真も含まれるので、
+      これ1つで別のPCへ丸ごと移せます。相場データは再取得できるため含みません。</p>
+  </div>
+</section>
+
+</main>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+/* ===================== 保存層 =====================
+   データは3層に分ける。
+     プリセット層 … コード内の PRESET_*。アプリを更新すると差し替わる。配布物に入る
+     設定層       … プリセットからの「差分」だけを保存。更新が届きつつ調整も残る
+     個人データ層 … 取引先・相場履歴・写真。配布物には入れない
+   保存先は IndexedDB（写真を扱うため localStorage の5MB制限では足りない）。
+   起動時に全件をメモリへ読み込み、以降は同期的に読み書きして非同期で永続化する。 */
+const K = { p:'jw_prices', h:'jw_hist', c:'jw_casters', s:'jw_settings',
+            m:'jw_market', src:'jw_src',
+            aOver:'jw_alloy_over', aHide:'jw_alloy_hide', aAdd:'jw_alloy_add',
+            prof:'jw_profile', blocks:'jw_blocks', jobs:'jw_jobs', migrated:'jw_migrated' };
+
+const DB = (()=>{
+  let db = null;
+  const req = r => new Promise((res,rej)=>{ r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); });
+  const os = (name,mode) => db.transaction(name,mode).objectStore(name);
+  return {
+    disabled:false,
+    /* 他タブが接続を握っていると open が永久に待つことがあるので、
+       5秒で諦めて localStorage 動作へ落とす（起動が固まるのを防ぐ） */
+    open(){ return new Promise((res,rej)=>{
+      let done=false; const fin=f=>(...a)=>{ if(!done){ done=true; f(...a); } };
+      const ok=fin(res), ng=fin(rej);
+      setTimeout(()=>ng(new Error('IndexedDB timeout')), 5000);
+      let rq; try{ rq = indexedDB.open('jewelry', 1); }catch(e){ return ng(e); }
+      rq.onupgradeneeded = e=>{ const d=e.target.result;
+        if(!d.objectStoreNames.contains('kv'))     d.createObjectStore('kv');
+        if(!d.objectStoreNames.contains('photos')) d.createObjectStore('photos'); };
+      rq.onsuccess = ()=>{ db=rq.result; ok(); };
+      rq.onerror   = ()=> ng(rq.error);
+      rq.onblocked = ()=> ng(new Error('IndexedDB blocked'));
+    });},
+    async all(){ const s=os('kv','readonly');
+      const [ks,vs] = await Promise.all([req(s.getAllKeys()), req(s.getAll())]);
+      const o={}; ks.forEach((k,i)=> o[k]=vs[i]); return o; },
+    put(k,v){ try{ os('kv','readwrite').put(v,k); }catch(e){} },
+    del(k){ try{ os('kv','readwrite').delete(k); }catch(e){} },
+    putPhoto(id,blob){ try{ os('photos','readwrite').put(blob,id); }catch(e){} },
+    getPhoto(id){ try{ return req(os('photos','readonly').get(id)); }catch(e){ return null; } },
+    delPhoto(id){ try{ os('photos','readwrite').delete(id); }catch(e){} },
+    allPhotos(){ const s=os('photos','readonly');
+      return Promise.all([req(s.getAllKeys()), req(s.getAll())]).then(([k,v])=>({k,v})); },
+    /* 削除の完了を待てるように Promise を返す（待たずにreloadすると消え残る） */
+    clear(){ try{
+      const t = db.transaction(['kv','photos'],'readwrite');
+      t.objectStore('kv').clear(); t.objectStore('photos').clear();
+      return new Promise(res=>{ t.oncomplete=res; t.onerror=res; t.onabort=res; });
+    }catch(e){ return Promise.resolve(); } },
+  };
+})();
+
+let store = {};
+const load = (k,d) => store[k] !== undefined ? store[k] : d;
+const save = (k,v) => { store[k]=v;
+  if(DB.disabled){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} } else DB.put(k,v); };
+const drop = k => { delete store[k]; DB.disabled ? localStorage.removeItem(k) : DB.del(k); };
+
+async function initStore(){
+  try{ await DB.open(); store = await DB.all(); }
+  catch(e){ DB.disabled = true; store = {}; }        // 非対応環境は localStorage で動かす（写真は不可）
+  if(!store[K.migrated]){                            // 旧 localStorage からの移行（初回のみ）
+    for(const k of Object.keys(localStorage)){
+      if(!k.startsWith('jw_') || store[k]!==undefined) continue;
+      try{ store[k] = JSON.parse(localStorage.getItem(k)); }catch(e){}
+    }
+    if(Array.isArray(store['jw_alloys'])){           // 旧「全件コピー」を差分へ変換
+      const d = alloysToDiff(store['jw_alloys']);
+      store[K.aOver]=d.over; store[K.aHide]=d.hide; store[K.aAdd]=d.add;
+      delete store['jw_alloys'];
+    }
+    store[K.migrated] = 1;
+    if(!DB.disabled) for(const k of Object.keys(store)) DB.put(k, store[k]);
+  }
+}
+/* 旧形式（素材を丸ごと保存）→ 差分形式へ */
+function alloysToDiff(old){
+  const byId = Object.fromEntries(PRESET_ALLOYS.map(a=>[a.id,a]));
+  const over={}, add=[], hide=[];
+  old.forEach(a=>{
+    const p = byId[a.id];
+    if(!p){ add.push(a); return; }
+    const d={};
+    for(const f of new Set([...Object.keys(a), ...Object.keys(p)])){
+      if(f==='id') continue;
+      if(JSON.stringify(a[f]) !== JSON.stringify(p[f])) d[f] = a[f];
+    }
+    if(Object.keys(d).length) over[a.id] = d;
+  });
+  const seen = new Set(old.map(a=>a.id));
+  PRESET_ALLOYS.forEach(p=>{ if(!seen.has(p.id)) hide.push(p.id); });
+  return {over, add, hide};
+}
+const yen = n => (n==null||!isFinite(n)) ? '—' : '¥' + Math.round(n).toLocaleString('ja-JP');
+const num = (n,d=2) => (n==null||!isFinite(n)) ? '—' : n.toLocaleString('ja-JP',{minimumFractionDigits:d,maximumFractionDigits:d});
+const val = id => { const v = parseFloat($(id).value); return isFinite(v) ? v : 0; };
+const esc = s => String(s??'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* メモ：短ければそのまま、長ければ1行目をたたんで表示 */
+function memoHTML(note){
+  const t = (note||'').trim(); if(!t) return '';
+  const lines = t.split('\n');
+  if(lines.length<=2 && t.length<=100) return `<div class="memo">${esc(t)}</div>`;
+  const rest = lines.slice(1).join('\n').trim();
+  return `<details class="memo"><summary>${esc(lines[0])}</summary>${
+    rest ? `<div class="body">${esc(rest)}</div>` : ''}</details>`;
+}
+const BASE = { gold:'金', platinum:'プラチナ', silver:'銀', other:'その他' };
+
+/* ---- プリセット層：配布物に入る。ユーザーの変更は差分として別に保存される ---- */
+const PRESET_ALLOYS = [
+  {id:'K24',  name:'K24 純金',        base:'gold',     purity:1,      density:19.32, factor:1},
+  {id:'K22',  name:'K22',             base:'gold',     purity:0.9167, density:17.30, factor:1},
+  {id:'K18Y', name:'K18 イエロー',    base:'gold',     purity:0.75,   density:15.60, factor:1},
+  {id:'K18W', name:'K18 ホワイト(Pd割)',base:'gold',   purity:0.75,   density:15.00, factor:1, pd:0.15},
+  {id:'K18WN',name:'K18 ホワイト(Ni割)',base:'gold',   purity:0.75,   density:14.70, factor:1},
+  {id:'K18P', name:'K18 ピンク',      base:'gold',     purity:0.75,   density:15.20, factor:1},
+  {id:'K14',  name:'K14',             base:'gold',     purity:0.585,  density:13.10, factor:1},
+  {id:'K10',  name:'K10',             base:'gold',     purity:0.4167, density:11.60, factor:1},
+  {id:'K9',   name:'K9',              base:'gold',     purity:0.375,  density:11.10, factor:1},
+  {id:'PT1000',name:'Pt1000',         base:'platinum', purity:1,      density:21.45, factor:1},
+  {id:'PT950',name:'Pt950',           base:'platinum', purity:0.95,   density:20.70, factor:1, pd:0.05},
+  {id:'PT900',name:'Pt900',           base:'platinum', purity:0.90,   density:20.00, factor:1, pd:0.10},
+  {id:'PT850',name:'Pt850',           base:'platinum', purity:0.85,   density:19.60, factor:1, pd:0.15},
+  {id:'SV1000',name:'SV1000 純銀',    base:'silver',   purity:1,      density:10.49, factor:1},
+  {id:'SV950',name:'SV950',           base:'silver',   purity:0.95,   density:10.40, factor:1},
+  {id:'SV925',name:'SV925 スターリング',base:'silver', purity:0.925,  density:10.36, factor:1},
+  {id:'BRASS',name:'真鍮',            base:'other',    purity:1,      density:8.50,  factor:1, fixed:2},
+  {id:'CU',   name:'銅',              base:'other',    purity:1,      density:8.96,  factor:1, fixed:2},
+];
+
+/* ---- 個人データ層：本人の取引先。配布ビルドでは空にする ----
+   BUILD.distribute = true にすると鋳造屋ゼロ件で始まる。
+   単価は 2026年7月時点の調査値で、他人の見積に流用できるものではないため。 */
+const BUILD = { distribute:true };
+const SEED_CASTERS = [];
+
+let prices = {gold:0, platinum:0, silver:0, date:'', src:''};
+let market, srcMode, hist, casters, settings, alloys, jobs;
+let lastVolume = 0;   // cm³ / 個
+
+/* プリセット ＋ 上書き － 非表示 ＋ 追加 を重ねて素材一覧を組み立てる。
+   これでアプリ更新時に新しい金種が届き、ユーザーの調整も残る */
+function buildAlloys(){
+  const over = load(K.aOver,{}), hide = load(K.aHide,[]), add = load(K.aAdd,[]);
+  return [ ...PRESET_ALLOYS.filter(a=>!hide.includes(a.id)).map(a=>({...a, ...(over[a.id]||{})})),
+           ...add ];
+}
+const isPreset = id => PRESET_ALLOYS.some(a=>a.id===id);
+function refreshAlloys(){ alloys = buildAlloys(); }
+
+function loadState(){
+  market   = load(K.m, null);          // 自動取得した相場（円/g・マージン適用前）
+  srcMode  = load(K.src, 'auto');      // 'auto' | 'manual'
+  hist     = load(K.h, []);            // 手動登録ぶん
+  casters  = load(K.c, null) || JSON.parse(JSON.stringify(SEED_CASTERS));
+  jobs     = load(K.jobs, []);
+  settings = load(K.s, {tax:10, margin:0});
+  refreshAlloys();
+}
+
+/* ===================== 表示するもの =====================
+   作り方（CAD／ワックス／彫金／彫り）で要る機能が違うので、
+   プロファイルで既定を決め、そこからの差分だけをユーザー設定として持つ。 */
+const BLOCKS = [
+  {id:'tab.calc',    g:'タブ',           n:'体積・重量'},
+  {id:'tab.quote',   g:'タブ',           n:'工賃見積'},
+  {id:'caster.list', g:'設定',           n:'鋳造屋の登録'},
+  {id:'tab.jobs',    g:'タブ',           n:'記録'},
+  {id:'jobs.stats',  g:'記録',           n:'実測から出た換算倍率'},
+  {id:'price.chart', g:'相場',           n:'推移グラフ'},
+  {id:'price.alloy', g:'相場',           n:'素材別の地金単価'},
+  {id:'price.manual',g:'相場',           n:'手動での相場登録'},
+  {id:'calc.vol',    g:'体積の求め方',   n:'体積を直接入力'},
+  {id:'calc.wax',    g:'体積の求め方',   n:'ワックス原型の重量から'},
+  {id:'calc.ref',    g:'体積の求め方',   n:'他素材の重量から'},
+  {id:'calc.shape',  g:'体積の求め方',   n:'形状から計算'},
+];
+const PROFILES = {
+  cad:     {n:'CAD中心',        d:'3Dデータから体積が出るので、ワックス重量からの換算は隠します', off:['calc.wax']},
+  wax:     {n:'ワックス原型',   d:'ワックスから鋳造する流れ。すべて表示します',                  off:[]},
+  hand:    {n:'彫金（地金から）',d:'鋳造を使わないので、工賃見積と鋳造屋を隠します',              off:['tab.quote','caster.list','calc.wax','calc.ref','jobs.stats']},
+  engrave: {n:'彫り',           d:'相場の確認と作業記録が中心。計算まわりを隠します',            off:['tab.quote','caster.list','tab.calc','jobs.stats']},
+  all:     {n:'すべて表示',     d:'制限なし',                                                    off:[]},
+};
+const profile = () => PROFILES[load(K.prof,'wax')] ? load(K.prof,'wax') : 'wax';
+const visible = id => {
+  const ov = load(K.blocks,{});
+  return ov[id] !== undefined ? ov[id] : !PROFILES[profile()].off.includes(id);
+};
+function applyBlocks(){
+  $$('[data-block]').forEach(el=> el.classList.toggle('hide', !visible(el.dataset.block)));
+  // 隠したタブが選択中だったら相場へ戻す
+  const cur = $('nav button.on');
+  if(cur && cur.dataset.block && !visible(cur.dataset.block)) showTab('price');
+  // 隠したモードが選択中だったら、表示されている先頭のモードへ
+  ['#mode-chip','#q-mode'].forEach(sel=>{
+    const on = $(sel+' button.on');
+    if(on && on.dataset.block && !visible(on.dataset.block)){
+      const first = $$(sel+' button').find(b=> !b.classList.contains('hide'));
+      if(first) first.click();
+    }
+  });
+}
+function showTab(t){
+  $$('nav button').forEach(x=>x.classList.toggle('on', x.dataset.t===t));
+  $$('main section').forEach(s=>s.classList.toggle('on', s.id===t));
+  if(t==='quote') renderQuote();
+}
+
+/* ---------- タブ ---------- */
+$$('nav button').forEach(b => b.onclick = ()=> showTab(b.dataset.t));
+
+function renderProfile(){
+  $('#profile-chip').innerHTML = Object.entries(PROFILES).map(([k,p])=>
+    `<button data-p="${k}" class="${profile()===k?'on':''}">${p.n}</button>`).join('');
+  $$('#profile-chip button').forEach(b=> b.onclick = ()=>{
+    save(K.prof, b.dataset.p); save(K.blocks, {});   // タイプを変えたら個別調整はリセット
+    renderProfile(); renderBlocks(); applyBlocks();
+  });
+  $('#profile-note').textContent = PROFILES[profile()].d + '。下の「表示する機能」で個別に足し引きできます。';
+}
+function renderBlocks(){
+  const ov = load(K.blocks,{}), groups = [...new Set(BLOCKS.map(b=>b.g))];
+  $('#block-list').innerHTML = groups.map(g=>
+    `<div style="margin-bottom:8px"><div class="nm" style="font-size:12px;color:var(--muted)">${g}</div>
+      <div class="row" style="gap:4px 16px">${BLOCKS.filter(b=>b.g===g).map(b=>
+        `<label class="sw" style="flex:0 1 210px">
+           <input type="checkbox" data-b="${b.id}"${visible(b.id)?' checked':''}>
+           <span style="color:var(--fg)">${b.n}</span>${ov[b.id]!==undefined?' <span class="tag edit">変更</span>':''}
+         </label>`).join('')}</div></div>`).join('');
+  $$('#block-list input[data-b]').forEach(el=> el.onchange = ()=>{
+    const id = el.dataset.b, o = load(K.blocks,{});
+    const def = !PROFILES[profile()].off.includes(id);
+    if(el.checked === def) delete o[id]; else o[id] = el.checked;   // 既定と同じなら差分を持たない
+    save(K.blocks, o); renderBlocks(); applyBlocks();
+  });
+}
+$('#reset-blocks').onclick = ()=>{ save(K.blocks,{}); renderBlocks(); applyBlocks(); };
+
+/* 初回だけ作り方を尋ねる */
+function askProfile(){
+  const d = document.createElement('div'); d.id='lightbox'; d.style.cursor='default';
+  d.innerHTML = `<div class="card" style="max-width:440px;width:100%">
+    <h2 class="hero"><span>ようこそ</span></h2>
+    <p style="margin:0 0 12px">作り方に合わせて、要らない機能を最初から隠します。あとから設定タブで変えられます。</p>
+    <div class="chip" id="ask-chip">${Object.entries(PROFILES).map(([k,p])=>
+      `<button data-p="${k}">${p.n}</button>`).join('')}</div>
+    <p class="note" id="ask-note">選んでください。</p></div>`;
+  document.body.appendChild(d);
+  d.querySelectorAll('#ask-chip button').forEach(b=> b.onclick = ()=>{
+    save(K.prof, b.dataset.p); d.remove();
+    renderProfile(); renderBlocks(); applyBlocks();
+  });
+  d.querySelector('#ask-note').textContent = '';
+}
+
+/* ---------- 単価 ---------- */
+/* 地金単価 = 主金属×純度 ＋ パラジウム割金×配合比。銅・亜鉛など安価な割金は0円扱い */
+function unitPrice(a){
+  if(a.fixed!=null && a.fixed>0) return a.fixed;
+  if(a.base==='other') return a.fixed||0;
+  const main = (prices[a.base]||0) * a.purity;
+  const pd   = (prices.palladium||0) * (a.pd||0);
+  return (main + pd) * (a.factor||1);
+}
+
+/* ---------- 相場の取得 ---------- */
+const OZ = 31.1034768;
+const today = () => new Date().toISOString().slice(0,10);
+const LBMA = { gold:'gold_pm', platinum:'platinum_pm', silver:'silver', palladium:'palladium_pm' };
+
+/* LBMA公表値(USD/oz) × ECB為替 → 円/g。直近約500営業日ぶんを端末に保存 */
+async function fetchMarket(force){
+  if(!force && market && market.dates && market.v?.palladium && market.updated === today()) { syncPrices(); return; }
+  const msg = $('#fetch-msg');
+  msg.className='msg'; msg.innerHTML='<span class="spin"></span>相場を取得しています…（初回は数秒かかります）';
+  try{
+    const [au, pt, ag, pd, fx] = await Promise.all([
+      fetch(`https://prices.lbma.org.uk/json/${LBMA.gold}.json`).then(r=>r.json()),
+      fetch(`https://prices.lbma.org.uk/json/${LBMA.platinum}.json`).then(r=>r.json()),
+      fetch(`https://prices.lbma.org.uk/json/${LBMA.silver}.json`).then(r=>r.json()),
+      fetch(`https://prices.lbma.org.uk/json/${LBMA.palladium}.json`).then(r=>r.json()).catch(()=>[]),
+      fetch('https://api.frankfurter.dev/v1/1999-01-01..?base=USD&symbols=JPY').then(r=>r.json()),
+    ]);
+    if(!fx?.rates) throw new Error('為替を取得できませんでした');
+    const fxDates = Object.keys(fx.rates).sort();
+    const rateAt = d => {                       // 該当日がなければ直前の営業日を使う
+      let lo=0, hi=fxDates.length-1, ans=null;
+      while(lo<=hi){ const mid=(lo+hi)>>1;
+        if(fxDates[mid]<=d){ ans=fxDates[mid]; lo=mid+1; } else hi=mid-1; }
+      return ans ? fx.rates[ans].JPY : null;
+    };
+    /* LBMA(USD/oz) → 円/g。為替が始まる1999-01-04以降のみ */
+    const conv = raw => {
+      const m = new Map();
+      raw.forEach(r=>{
+        if(!r.v || !(r.v[0]>0) || r.d < fxDates[0]) return;
+        const jpy = rateAt(r.d); if(!jpy) return;
+        m.set(r.d, +(r.v[0]*jpy/OZ).toFixed(2));
+      });
+      return m;
+    };
+    const maps = { gold:conv(au), platinum:conv(pt), silver:conv(ag), palladium:conv(pd||[]) };
+    if(!maps.gold.size) throw new Error('相場データが空です');
+
+    const dates = [...new Set(MET.flatMap(s=>[...maps[s.k].keys()]))].sort();
+    const v = {};
+    MET.forEach(s=>{ const mp=maps[s.k]; v[s.k] = dates.map(d=> mp.has(d) ? mp.get(d) : null); });
+
+    const jpyNow = fx.rates[fxDates[fxDates.length-1]].JPY;
+    const spot = {};
+    await Promise.all([['gold','XAU'],['platinum','XPT'],['silver','XAG'],['palladium','XPD']].map(([k,sym])=>
+      fetch(`https://api.gold-api.com/price/${sym}`).then(r=>r.json())
+        .then(j=>{ if(j?.price>0){ spot[k]=+(j.price*jpyNow/OZ).toFixed(2); spot.at=j.updatedAt; } })
+        .catch(()=>{})));
+
+    market = { updated:today(), dates, v, spot, jpy:jpyNow, fxDate:fxDates[fxDates.length-1] };
+    try{ save(K.m, market); }
+    catch(err){   // 保存領域が足りない場合は直近10年分に切り詰めて保存
+      const cut = Math.max(0, dates.length-2600), trimmed = {...market, dates:dates.slice(cut)};
+      trimmed.v = {}; MET.forEach(s=> trimmed.v[s.k]=v[s.k].slice(cut));
+      market = trimmed; save(K.m, market);
+    }
+    msg.className=''; msg.innerHTML='';
+  }catch(e){
+    msg.className='msg';
+    msg.innerHTML = market
+      ? `最新の取得に失敗しました（${new Date(market.updated).toLocaleDateString('ja-JP')}時点の保存データを表示しています）。`
+      : 'オフラインのため相場を取得できませんでした。接続後に「最新に更新」を押すか、下の手動登録をお使いください。';
+  }
+  syncPrices();
+}
+
+/* 自動取得ぶんを {date,gold,platinum,silver} の行に整形（上乗せ率を適用） */
+function mIndex(d){                       // dates[i] >= d となる最小の i
+  const A = market.dates; let lo=0, hi=A.length;
+  while(lo<hi){ const mid=(lo+hi)>>1; if(A[mid]<d) lo=mid+1; else hi=mid; }
+  return lo;
+}
+function marketRows(from){
+  if(!market || !market.dates) return [];
+  const m = 1+(settings.margin||0)/100, A = market.dates, out = [];
+  for(let i = from ? mIndex(from) : 0; i < A.length; i++){
+    const r = {date:A[i], src:'LBMA'}; let any=false;
+    for(const s of MET){ const v = market.v[s.k]?.[i]; if(v>0){ r[s.k]=v*m; any=true; } }
+    if(any) out.push(r);
+  }
+  return out;
+}
+const marketTail = n => (market && market.dates)
+  ? marketRows(market.dates[Math.max(0, market.dates.length-n)]) : [];
+/* 計算に使う相場を決める */
+function syncPrices(){
+  const m = 1+(settings.margin||0)/100;
+  if(srcMode==='manual'){
+    prices = hist.length ? {...hist[0]} : {gold:0,platinum:0,silver:0,date:'',src:'未登録'};
+  }else if(market && market.dates){
+    const last = marketTail(3).slice(-1)[0] || {};
+    prices = { date:last.date||'', src:'LBMA' };
+    MET.forEach(s=> prices[s.k] = (market.spot?.[s.k]||0)*m || last[s.k] || 0);
+  }else{
+    prices = {gold:0,platinum:0,silver:0,date:'',src:'未取得'};
+  }
+  save(K.p, prices);
+  renderPrice(); renderWeights(); renderQuote();
+}
+
+/* ---------- 相場の表示 ---------- */
+function renderPrice(){
+  const rows = marketTail(5), last = rows[rows.length-1], prev = rows[rows.length-2];
+  const auto = srcMode!=='manual';
+  SER.forEach(s=>{
+    const v = prices[s.k];
+    $('#v-'+s.k).textContent = v ? (s.k==='silver' ? num(v,1) : Math.round(v).toLocaleString('ja-JP')) : '—';
+    let sub = '';
+    if(auto && last && prev && last[s.k] && prev[s.k]){
+      const ch = (last[s.k]/prev[s.k]-1)*100;
+      sub = `<span class="${ch>0.005?'up':ch<-0.005?'down':''}">前営業日比 ${ch>=0?'+':''}${ch.toFixed(2)}%</span>`;
+    }
+    if(auto && last && last[s.k])
+      sub += `<br>建値 ${s.k==='silver'?num(last[s.k],1):Math.round(last[s.k]).toLocaleString('ja-JP')}（${last.date}）`;
+    $('#c-'+s.k).innerHTML = sub;
+  });
+  $('#src-pill').textContent = auto ? '自動取得' : '手動登録';
+  $('#use-manual').checked = !auto;
+  $('#price-meta').innerHTML = auto
+    ? (market
+       ? `LBMA 公表値（ロンドン基準・USD/oz）を ECB 為替 <b>${num(market.jpy,2)} 円/USD</b> で円/gに換算。
+          大きい数字は${market.spot?.at?'現在のスポット値':'直近の建値'}、その下が LBMA の建値です。
+          ${settings.margin? `上乗せ ${settings.margin}% 適用中。`:''}`
+       : '相場を取得していません。「最新に更新」を押してください。')
+    : (prices.date ? `基準日 ${prices.date} ／ ${prices.src||'手入力'}` : '手動登録の相場がありません。下のフォームから登録してください。');
+
+  $('#in-gold').value = prices.gold?Math.round(prices.gold):'';
+  $('#in-platinum').value = prices.platinum?Math.round(prices.platinum):'';
+  $('#in-silver').value = prices.silver?prices.silver.toFixed(1):'';
+  $('#in-palladium').value = prices.palladium?Math.round(prices.palladium):'';
+  $('#in-date').value = $('#in-date').value || today();
+
+  $('#hist-count').textContent = `${hist.length}件`;
+  const tb = $('#hist tbody'); tb.innerHTML='';
+  hist.forEach(h=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${h.date||''}</td>`
+      + SER.map(s=>`<td class="num">${h[s.k] ? (s.k==='silver'?num(h[s.k],1):Math.round(h[s.k]).toLocaleString('ja-JP')) : '—'}</td>`).join('')
+      + `<td style="font-size:12px">${h.src||''}</td>
+         <td style="white-space:nowrap"><button class="ghost r">再適用</button> <button class="del x">×</button></td>`;
+    tr.querySelector('.r').onclick = ()=>{
+      hist = [h, ...hist.filter(x=>x.date!==h.date)]; save(K.h,hist);
+      srcMode='manual'; save(K.src,srcMode); syncPrices();
+    };
+    tr.querySelector('.x').onclick = ()=>{
+      if(!confirm(`${h.date} の記録を削除しますか？`)) return;
+      hist = hist.filter(x=>x.date!==h.date); save(K.h,hist); syncPrices();
+    };
+    tb.appendChild(tr);
+  });
+
+  renderAlloyPrice(); drawChart();
+}
+
+/* ---------- 推移グラフ ---------- */
+let chartPeriod = 1, chartMode = 'actual', chartCtx = null;
+const SER = [ {k:'gold', n:'金', c:'#c9a227'}, {k:'platinum', n:'プラチナ', c:'#6b8fa3'},
+              {k:'silver', n:'銀', c:'#9c9c9c'}, {k:'palladium', n:'パラジウム', c:'#8d7fa5'} ];
+const MET = SER;
+
+function visibleHist(){
+  let from = null;
+  if(chartPeriod){ const d = new Date(); d.setMonth(d.getMonth()-chartPeriod); from = d.toISOString().slice(0,10); }
+  if(srcMode!=='manual') return marketRows(from);            // すでに古い順
+  return hist.filter(h=>h.date && (!from || h.date >= from))
+             .slice().sort((a,b)=> a.date < b.date ? -1 : a.date > b.date ? 1 : 0);   // 古い順
+}
+/* 点が多すぎるときは間引く（両端は必ず残す） */
+function thin(pts, max){
+  if(pts.length <= max) return pts;
+  const step = Math.ceil(pts.length/max), out = [];
+  for(let i=0;i<pts.length;i+=step) out.push(pts[i]);
+  if(out[out.length-1] !== pts[pts.length-1]) out.push(pts[pts.length-1]);
+  return out;
+}
+function ticksOf(lo,hi,n){
+  const raw=(hi-lo)/n, mag=Math.pow(10,Math.floor(Math.log10(raw)||0));
+  const step=([1,1.5,2,2.5,3,4,5,10].find(m=>mag*m>=raw)||10)*mag, out=[];
+  for(let v=Math.ceil(lo/step)*step; v<=hi+1e-9; v+=step) out.push(v);
+  return out;
+}
+const md = s => { const [y,m,d]=s.split('-'); return `${+m}/${+d}`; };
+const ym = s => { const [y,m]=s.split('-'); return `${y.slice(2)}/${+m}`; };
+const yy = s => s.slice(0,4);
+/* X軸の目盛り（4〜5点）＋薄い縦線 */
+function xAxis(data, X, y, top){
+  const days = (+new Date(data[data.length-1].date) - +new Date(data[0].date))/86400000;
+  const fmt = days>1200 ? yy : days>150 ? ym : md, n = Math.min(5, data.length), out=[];
+  for(let i=0;i<n;i++){
+    const d = data[Math.round(i*(data.length-1)/(n-1))];
+    const x = X(d.date), anchor = i===0?'start':i===n-1?'end':'middle';
+    out.push(`<line class="grid" x1="${x.toFixed(1)}" y1="${top}" x2="${x.toFixed(1)}" y2="${y-13}" opacity=".55"/>`
+           + `<text class="axis" x="${x.toFixed(1)}" y="${y}" text-anchor="${anchor}">${fmt(d.date)}</text>`);
+  }
+  return out.join('');
+}
+
+function drawChart(){
+  const data = visibleHist(), wrap = $('#chart-wrap');
+  $('#chart-read').innerHTML=''; chartCtx=null;
+  if(data.length < 2){
+    wrap.innerHTML = `<p class="note">${srcMode==='manual'
+      ? '手動登録が2日分以上あるとグラフが表示されます。基準日を変えて過去分を入力すれば、さかのぼって描画できます。'
+      : '相場データがありません。「最新に更新」を押してください。'}</p>`;
+    $('#chart-legend').innerHTML=''; return;
+  }
+  const W=700, PADL=56, PADR=16, PW=W-PADL-PADR;
+  const t0=+new Date(data[0].date), t1=+new Date(data[data.length-1].date), span=Math.max(1,t1-t0);
+  const X = ds => PADL + PW*((+new Date(ds)-t0)/span);
+
+  const series = SER.map(s=>{
+    const all = data.filter(d=>d[s.k]>0).map(d=>({d:d.date, v:d[s.k]}));
+    let mn=Infinity, mx=-Infinity;
+    for(const p of all){ if(p.v<mn) mn=p.v; if(p.v>mx) mx=p.v; }
+    return {...s, pts:thin(all,900), min:mn, max:mx,
+            first: all[0]?.v||0, last: all[all.length-1]?.v||0};
+  }).filter(s=>s.pts.length>0);
+  const axisLabel = t => Math.abs(t)<1e-9 ? '0'
+    : t>=1000 ? Math.round(t).toLocaleString('ja-JP') : num(t, t>=100?1:2);
+  const DOTS = 150;   // これを超える点数では線だけ描く（6ヶ月＝約125営業日）
+
+  let svg='', H;
+  if(chartMode==='index'){
+    H=292; const TOP=16, BOT=250;
+    const idx = series.filter(s=>s.pts.length>1);
+    const vals = idx.flatMap(s=>[s.min/s.first*100, s.max/s.first*100]);
+    let lo=Math.min(...vals,100), hi=Math.max(...vals,100);
+    const pad=((hi-lo)||10)*0.15; lo-=pad; hi+=pad;
+    const Y = v => BOT-(v-lo)/(hi-lo)*(BOT-TOP);
+    ticksOf(lo,hi,5).forEach(t=>{
+      svg+=`<line class="grid" x1="${PADL}" y1="${Y(t).toFixed(1)}" x2="${W-PADR}" y2="${Y(t).toFixed(1)}"/>`
+         + `<text class="axis" x="${PADL-8}" y="${(Y(t)+4).toFixed(1)}" text-anchor="end">${t.toFixed(0)}</text>`;
+    });
+    svg+=`<line class="grid" x1="${PADL}" y1="${Y(100).toFixed(1)}" x2="${W-PADR}" y2="${Y(100).toFixed(1)}" stroke-dasharray="4 3"/>`;
+    idx.forEach(s=>{
+      const d = s.pts.map((p,i)=>`${i?'L':'M'}${X(p.d).toFixed(1)},${Y(p.v/s.first*100).toFixed(1)}`).join('');
+      svg+=`<path d="${d}" fill="none" stroke="${s.c}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+      if(s.pts.length<=DOTS) s.pts.forEach(p=>svg+=`<circle cx="${X(p.d).toFixed(1)}" cy="${Y(p.v/s.first*100).toFixed(1)}" r="2.2" fill="${s.c}"/>`);
+    });
+    svg = xAxis(data, X, BOT+18, TOP) + svg
+        + `<text class="axis" x="${PADL-8}" y="${TOP-2}" text-anchor="end">指数</text>`;
+  } else {
+    const PH=78, GAP=30, TOPM=16; H = TOPM + series.length*(PH+GAP);
+    series.forEach((s,i)=>{
+      const top=TOPM+i*(PH+GAP), bot=top+PH;
+      let lo=s.min, hi=s.max;
+      if(hi===lo){ hi=lo*1.01+1; lo=lo*0.99-1; }
+      const pad=(hi-lo)*0.18; lo=Math.max(0, lo-pad); hi+=pad;
+      const Y = v => bot-(v-lo)/(hi-lo)*(bot-top);
+      ticksOf(lo,hi,3).forEach(t=>{
+        svg+=`<line class="grid" x1="${PADL}" y1="${Y(t).toFixed(1)}" x2="${W-PADR}" y2="${Y(t).toFixed(1)}"/>`
+           + `<text class="axis" x="${PADL-8}" y="${(Y(t)+4).toFixed(1)}" text-anchor="end">${axisLabel(t)}</text>`;
+      });
+      if(s.pts.length>1){
+        const d = s.pts.map((p,j)=>`${j?'L':'M'}${X(p.d).toFixed(1)},${Y(p.v).toFixed(1)}`).join('');
+        svg+=`<path d="${d}" fill="none" stroke="${s.c}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+      }
+      if(s.pts.length<=DOTS)
+        s.pts.forEach(p=>svg+=`<circle cx="${X(p.d).toFixed(1)}" cy="${Y(p.v).toFixed(1)}" r="2.2" fill="${s.c}"/>`);
+      svg+=`<text class="plabel" x="${PADL}" y="${top-4}">${s.n} <tspan fill="${s.c}">${Math.round(s.last).toLocaleString('ja-JP')} 円/g</tspan></text>`;
+      if(i===series.length-1) svg+=xAxis(data, X, bot+16, top);
+    });
+  }
+  wrap.innerHTML = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${svg}
+    <line id="vline" x1="0" y1="0" x2="0" y2="${H}" stroke="var(--muted)" stroke-width="1" opacity="0"/>
+    <rect id="hit" x="${PADL}" y="0" width="${PW}" height="${H}" fill="transparent"/></svg>`;
+  chartCtx = {data, X, W, PADL, PW};
+
+  $('#chart-legend').innerHTML = series.map(s=>{
+    const ch = s.first ? (s.last/s.first-1)*100 : 0;
+    const cls = ch>0.05?'up':ch<-0.05?'down':'';
+    return `<span class="lg"><i style="background:${s.c}"></i>${s.n}
+      <b class="d">${Math.round(s.last).toLocaleString('ja-JP')}円/g</b>
+      <span class="d ${cls}">${ch>=0?'+':''}${ch.toFixed(1)}%</span></span>`;
+  }).join('') + `<span class="lg" style="color:var(--muted)">${data[0].date} 〜 ${data[data.length-1].date}
+      （${data.length.toLocaleString('ja-JP')}営業日）</span>`;
+
+  const svgEl = wrap.querySelector('svg'), vline = wrap.querySelector('#vline');
+  const move = e=>{
+    const r = svgEl.getBoundingClientRect();
+    const cx = ((e.touches?e.touches[0].clientX:e.clientX) - r.left) / r.width * W;
+    let best=null, bd=1e9;
+    data.forEach(d=>{ const dx=Math.abs(X(d.date)-cx); if(dx<bd){bd=dx; best=d;} });
+    if(!best) return;
+    vline.setAttribute('opacity','.5');
+    vline.setAttribute('x1', X(best.date)); vline.setAttribute('x2', X(best.date));
+    $('#chart-read').innerHTML = `<b>${best.date}</b> ｜ ` + SER.map(s=>{
+      if(!best[s.k]) return `${s.n} —`;
+      const base = series.find(x=>x.k===s.k)?.first;
+      const ix = base ? ` <span style="opacity:.7">(${(best[s.k]/base*100).toFixed(1)})</span>` : '';
+      return `<span style="color:${s.c}">■</span>${s.n} <b>${s.k==='silver'?num(best[s.k],1):Math.round(best[s.k]).toLocaleString('ja-JP')}</b>円/g${ix}`;
+    }).join(' ｜ ') + (best.src?` <span style="opacity:.7">／ ${best.src}</span>`:'');
+  };
+  svgEl.addEventListener('mousemove', move);
+  svgEl.addEventListener('touchstart', move); svgEl.addEventListener('touchmove', move);
+  svgEl.addEventListener('mouseleave', ()=>{ vline.setAttribute('opacity','0'); $('#chart-read').innerHTML=''; });
+}
+$$('#period-chip button').forEach(b=> b.onclick = ()=>{
+  $$('#period-chip button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  chartPeriod = +b.dataset.p; renderPrice();
+});
+$$('#cmode-chip button').forEach(b=> b.onclick = ()=>{
+  $$('#cmode-chip button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  chartMode = b.dataset.c; drawChart();
+});
+$('#csv').onclick = ()=>{
+  const rows = [['日付', ...SER.map(s=>`${s.n}(円/g)`), '出典']]
+    .concat(visibleHist().reverse().map(h=>
+      [h.date, ...SER.map(s=>h[s.k]||''), (h.src||'').replace(/[,\r\n]/g,' ')]));
+  const blob = new Blob(['﻿'+rows.map(r=>r.join(',')).join('\r\n')],{type:'text/csv'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`相場履歴-${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(a.href);
+};
+function renderAlloyPrice(){
+  const tb = $('#alloy-price tbody'); tb.innerHTML='';
+  alloys.forEach(a=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML = `<td>${a.name}</td><td class="num">${num(a.density,2)}</td>
+      <td class="num">${(a.purity*100).toFixed(1)}%</td>
+      <td class="num">${a.pd? (a.pd*100).toFixed(1)+'%' : '—'}</td>
+      <td class="num">${num(a.factor||1,2)}</td>
+      <td class="num"><b>${unitPrice(a)?yen(unitPrice(a)):'—'}</b></td>`;
+    tb.appendChild(tr);
+  });
+  $('#pd-note').innerHTML = `単価 =（主金属 × 純度）+（パラジウム × 割金比率）× 係数。
+    銅・亜鉛など安価な割金は0円扱いです。パラジウム相場
+    <b>${prices.palladium?yen(prices.palladium)+' /g':'未取得'}</b>。
+    K18WGやPt900の割金比率は地金商・ロットで変わるため、設定タブで実際の配合に合わせてください。
+    係数は精錬手数料などの上乗せ率です。`;
+}
+$('#save-price').onclick = ()=>{
+  const rec = {gold:val('#in-gold'), platinum:val('#in-platinum'), silver:val('#in-silver'),
+               palladium:val('#in-palladium'),
+               date:$('#in-date').value || new Date().toISOString().slice(0,10),
+               src:$('#in-src').value||'手入力'};
+  hist = hist.filter(h=>h.date!==rec.date);
+  hist.push(rec);
+  hist.sort((a,b)=> a.date<b.date?1:a.date>b.date?-1:0);   // 新しい順
+  hist = hist.slice(0,1000);
+  save(K.h, hist);
+  srcMode = 'manual'; save(K.src, srcMode);   // 手動登録したらそれを使う
+  syncPrices();
+};
+$('#reload').onclick = ()=> fetchMarket(true);
+$('#use-manual').onchange = e=>{
+  srcMode = e.target.checked ? 'manual' : 'auto'; save(K.src, srcMode);
+  if(srcMode==='manual' && !hist.length){
+    $('#fetch-msg').className='msg';
+    $('#fetch-msg').innerHTML='手動登録の相場がまだありません。下の「手動で相場を登録する」から入力してください。';
+  } else $('#fetch-msg').innerHTML='';
+  syncPrices();
+};
+
+/* ---------- 体積・重量 ---------- */
+const SHAPES = {
+  'ring-flat':  {f:['内径 (mm)','幅 (mm)','厚み (mm)'], v:(d,w,t)=> Math.PI*(d+t)*w*t },
+  'ring-round': {f:['内径 (mm)','幅 (mm)','厚み (mm)'], v:(d,w,t)=> Math.PI*(d+t)*w*t*0.7854 },
+  'ring-wire':  {f:['内径 (mm)','線径 (mm)'],           v:(d,w)=> Math.PI*(d+w)*Math.PI*w*w/4 },
+  'cyl':        {f:['直径 (mm)','長さ (mm)'],           v:(d,l)=> Math.PI*d*d/4*l },
+  'box':        {f:['縦 (mm)','横 (mm)','高さ (mm)'],   v:(a,b,c)=> a*b*c },
+  'sphere':     {f:['直径 (mm)'],                       v:(d)=> Math.PI*d*d*d/6 },
+  'pipe':       {f:['外径 (mm)','内径 (mm)','長さ (mm)'],v:(o,i,l)=> Math.PI*(o*o-i*i)/4*l },
+};
+function renderShapeFields(){
+  const k = $('#shape-kind').value, sp = SHAPES[k];
+  $('#shape-fields').innerHTML = sp.f.map((lb,i)=>
+    `<div><label>${lb}</label><input type="number" class="sf" data-i="${i}" step="0.1"></div>`).join('');
+  $$('.sf').forEach(el=>el.oninput = renderWeights);
+  $('#ringsize-row').classList.toggle('hide', !k.startsWith('ring'));
+}
+$('#shape-kind').onchange = ()=>{ renderShapeFields(); renderWeights(); };
+$('#go-calc').onclick = ()=>{
+  const go = val('#ring-go'); if(!go) return;
+  const inner = (go+40)/Math.PI;
+  const f = $$('.sf')[0]; if(f){ f.value = inner.toFixed(2); renderWeights(); }
+};
+$$('#mode-chip button').forEach(b=> b.onclick = ()=>{
+  $$('#mode-chip button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  ['vol','wax','ref','shape'].forEach(m=> $('#m-'+m).classList.toggle('hide', m!==b.dataset.m));
+  renderWeights();
+});
+function currentMode(){ return $('#mode-chip button.on').dataset.m; }
+function computeVolume(){
+  const m = currentMode();
+  if(m==='vol'){ return val('#vol-in') / parseFloat($('#vol-unit').value); }
+  if(m==='wax'){ const d = val('#wax-d')||0.95; return val('#wax-g')/d; }
+  if(m==='ref'){ const a = alloys.find(x=>x.id===$('#ref-alloy').value); return a? val('#ref-g')/a.density : 0; }
+  if(m==='shape'){
+    const sp = SHAPES[$('#shape-kind').value];
+    const args = $$('.sf').map(el=> parseFloat(el.value)||0);
+    return sp.v(...args) / 1000;  // mm³ → cm³
+  }
+  return 0;
+}
+function renderWeights(){
+  const v = computeVolume(); lastVolume = v;
+  const qty = Math.max(1, val('#qty')||1), loss = 1 + (val('#loss')||0)/100;
+  $('#r-vol').textContent   = v ? num(v,3) : '—';
+  $('#r-vol-t').textContent = v ? num(v*qty*loss,3) : '—';
+  const tb = $('#wt-table tbody'); tb.innerHTML='';
+  handoffNote();
+  alloys.forEach(a=>{
+    const w1 = v*a.density, wt = w1*qty, wl = wt*loss, up = unitPrice(a);
+    const tr=document.createElement('tr');
+    tr.innerHTML = `<td>${a.name}</td><td class="num">${num(a.density,2)}</td>
+      <td class="num">${v?num(w1,2):'—'}</td><td class="num">${v?num(wt,2):'—'}</td>
+      <td class="num"><b>${v?num(wl,2):'—'}</b></td><td class="num">${up?yen(up):'—'}</td>
+      <td class="num">${(v&&up)?yen(wl*up):'—'}</td>`;
+    tb.appendChild(tr);
+  });
+}
+$('#to-alloy').addEventListener('change', handoffNote);
+['#vol-in','#vol-unit','#wax-g','#wax-d','#ref-g','#ref-alloy','#qty','#loss'].forEach(s=>{
+  $(s).addEventListener('input', renderWeights); $(s).addEventListener('change', renderWeights);
+});
+
+/* ---------- 写真 ---------- */
+const urlCache = {};
+async function photoURL(id){
+  if(urlCache[id]) return urlCache[id];
+  const b = await DB.getPhoto(id); if(!b) return null;
+  return urlCache[id] = URL.createObjectURL(b);
+}
+/* 端末の写真はそのままだと数MBあるので長辺1600pxのJPEGに縮めて保存する */
+async function shrink(file, max=1600, q=0.85){
+  try{
+    const img = await createImageBitmap(file);
+    const s = Math.min(1, max/Math.max(img.width, img.height));
+    if(s===1 && file.size < 400*1024) return file;
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.width*s); c.height = Math.round(img.height*s);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    return await new Promise(r=> c.toBlob(r, 'image/jpeg', q)) || file;
+  }catch(e){ return file; }
+}
+/* サムネイルを描く。removable=true なら削除ボタン付き */
+function renderPhotos(box, list, onRemove){
+  box.innerHTML = (list||[]).map(p=>
+    `<figure data-id="${p.id}"><img alt="${esc(p.name||'')}">${
+      onRemove?'<button class="rm" title="削除">×</button>':''}</figure>`).join('');
+  (list||[]).forEach(async p=>{
+    const u = await photoURL(p.id), fig = box.querySelector(`figure[data-id="${p.id}"]`);
+    if(fig && u) fig.querySelector('img').src = u;
+  });
+  box.querySelectorAll('img').forEach(im=> im.onclick = ()=> im.src && lightbox(im.src));
+  if(onRemove) box.querySelectorAll('.rm').forEach(b=>
+    b.onclick = ()=> onRemove(b.closest('figure').dataset.id));
+}
+function lightbox(src){
+  const d = document.createElement('div'); d.id='lightbox';
+  d.innerHTML = `<img src="${src}">`;
+  d.onclick = ()=> d.remove(); document.body.appendChild(d);
+}
+
+/* ---------- 鋳造屋 ---------- */
+let editing = null, formPhotos = [];
+function renderCasters(){
+  const box = $('#caster-list'); box.innerHTML='';
+  $('#caster-n').textContent = `${casters.length}件`;
+  if(!casters.length){ box.innerHTML = '<p class="note">まだ登録がありません。</p>'; }
+  casters.forEach((c,i)=>{
+    const d = document.createElement('div'); d.className='caster';
+    const rates = Object.keys(BASE).filter(k=>c.rates[k]).map(k=>`${BASE[k]} ${yen(c.rates[k])}/g`).join('　');
+    const ar = c.alloyRates && Object.keys(c.alloyRates).length
+      ? `<div class="meta">金種別単価：${Object.entries(c.alloyRates).map(([id,v])=>{
+          const a=alloys.find(x=>x.id===id); return `${esc(a?a.name:id)} ${yen(v)}`;}).join('／')}</div>` : '';
+    const wf = c.waxFactor && Object.keys(c.waxFactor).length
+      ? `<div class="meta">WAX1gあたり：${Object.entries(c.waxFactor).map(([id,v])=>{
+          const a=alloys.find(x=>x.id===id); return `${esc(a?a.name:id)} ×${v}`;}).join('／')}</div>` : '';
+    d.innerHTML = `<h3>${esc(c.name)} <span class="pill">${c.tax==='in'?'税込':'税抜'}</span></h3>
+      <div class="meta">${rates||'単価未設定'}</div>${ar}${wf}
+      <div class="meta">基準：${c.basis==='total'?'総重量（湯道込）':'製品重量'}
+        基本料 ${yen(c.piece)}/個　最低工賃 ${yen(c.pieceMin||0)}/個　手数料 ${yen(c.setup)}</div>
+      ${memoHTML(c.note)}
+      <div class="photos" data-ph="${i}"></div>
+      <div style="margin-top:8px"><button class="ghost e">編集</button> <button class="del d">削除</button></div>`;
+    d.querySelector('.e').onclick = ()=> openForm(i);
+    d.querySelector('.d').onclick = ()=>{
+      if(!confirm(`「${c.name}」を削除しますか？${c.photos?.length?`（写真${c.photos.length}枚も消えます）`:''}`)) return;
+      (c.photos||[]).forEach(p=>{ DB.delPhoto(p.id); delete urlCache[p.id]; });
+      casters.splice(i,1); save(K.c,casters); renderCasters(); renderQuote();
+    };
+    box.appendChild(d);
+    renderPhotos(d.querySelector('[data-ph]'), c.photos);
+  });
+}
+function openForm(i){
+  editing = i;
+  const c = i==null ? {name:'',basis:'product',rates:{gold:0,platinum:0,silver:0,other:0},alloyRates:{},piece:0,pieceMin:0,setup:0,tax:'ex',note:''} : casters[i];
+  $('#cf-title').textContent = i==null ? '鋳造屋の登録' : '鋳造屋の編集';
+  $('#cf-name').value=c.name; $('#cf-basis').value=c.basis;
+  $('#cf-gold').value=c.rates.gold; $('#cf-platinum').value=c.rates.platinum;
+  $('#cf-silver').value=c.rates.silver; $('#cf-other').value=c.rates.other;
+  $('#cf-piece').value=c.piece; $('#cf-piecemin').value=c.pieceMin||0;
+  $('#cf-setup').value=c.setup;
+  $('#cf-tax').value=c.tax; $('#cf-note').value=c.note||'';
+  const ar = c.alloyRates||{}, wf = c.waxFactor||{};
+  $('#cf-alloy-rates').innerHTML = alloys.map(a=>
+    `<div style="flex:0 1 130px"><label>${esc(a.name)}</label>
+       <input type="number" class="cfar" data-id="${a.id}" step="1" value="${ar[a.id]!=null?ar[a.id]:''}"></div>`).join('');
+  $('#cf-wax').innerHTML = alloys.map(a=>
+    `<div style="flex:0 1 130px"><label>${esc(a.name)}<br><span style="opacity:.7">理論 ${num(a.density/0.95,1)}</span></label>
+       <input type="number" class="cfwf" data-id="${a.id}" step="0.1" value="${wf[a.id]!=null?wf[a.id]:''}"></div>`).join('');
+  formPhotos = JSON.parse(JSON.stringify(c.photos||[]));
+  drawFormPhotos();
+  $('#caster-form').classList.remove('hide');
+  $('#caster-form').scrollIntoView({behavior:'smooth',block:'center'});
+}
+function drawFormPhotos(){
+  renderPhotos($('#cf-photos'), formPhotos, id=>{
+    formPhotos = formPhotos.filter(p=>p.id!==id);
+    DB.delPhoto(id); delete urlCache[id];
+    drawFormPhotos();
+  });
+}
+$('#cf-addphoto').onclick = ()=> $('#cf-photofile').click();
+$('#cf-photofile').onchange = async e=>{
+  for(const f of e.target.files){
+    const id = 'p'+Date.now()+Math.round(Math.random()*1e6);
+    DB.putPhoto(id, await shrink(f));
+    formPhotos.push({id, name:f.name});
+  }
+  e.target.value=''; drawFormPhotos();
+};
+$('#add-caster').onclick = ()=> openForm(null);
+$('#cf-cancel').onclick = ()=> $('#caster-form').classList.add('hide');
+$('#cf-save').onclick = ()=>{
+  const name = $('#cf-name').value.trim();
+  if(!name){ alert('店名を入力してください'); return; }
+  const alloyRates = {}, waxFactor = {};
+  $$('.cfar').forEach(el=>{ const v=parseFloat(el.value); if(isFinite(v)&&v>0) alloyRates[el.dataset.id]=v; });
+  $$('.cfwf').forEach(el=>{ const v=parseFloat(el.value); if(isFinite(v)&&v>0) waxFactor[el.dataset.id]=v; });
+  const c = { name, basis:$('#cf-basis').value,
+    rates:{gold:val('#cf-gold'), platinum:val('#cf-platinum'), silver:val('#cf-silver'), other:val('#cf-other')},
+    alloyRates, waxFactor, photos: formPhotos,
+    piece:val('#cf-piece'), pieceMin:val('#cf-piecemin'), setup:val('#cf-setup'),
+    tax:$('#cf-tax').value, note:$('#cf-note').value.trim() };
+  if(editing==null) casters.push(c); else casters[editing]=c;
+  save(K.c, casters); $('#caster-form').classList.add('hide'); renderCasters(); renderQuote();
+};
+$('#seed-caster').onclick = ()=>{
+  const add = SEED_CASTERS.filter(d=> !casters.some(c=>c.name===d.name));
+  if(!add.length){ alert(BUILD.distribute ? '配布ビルドのため登録例はありません。' : '登録例はすでに登録されています。'); return; }
+  casters.push(...JSON.parse(JSON.stringify(add)));
+  save(K.c, casters); renderCasters(); renderQuote();
+  alert(`${add.map(a=>a.name).join('・')} を追加しました。`);
+};
+if(BUILD.distribute) $('#seed-caster').classList.add('hide');
+
+/* ===================== 記録 =====================
+   案件ごとに写真・メモ・実績値を残す。数値は任意なので、
+   鋳造に出さない人（彫金・彫り）は作業ログとしてだけ使える。 */
+let editingJob = null, jobPhotos = [], jobFilter = '';
+
+/* 実測の換算倍率：同じ鋳造屋・同じ素材で「ワックス重量→実際の上がり重量」の平均 */
+function measuredFactor(casterName, alloyId){
+  const rows = jobs.filter(j=> j.caster===casterName && j.alloy===alloyId
+                            && j.wax>0 && j.actual>0);
+  if(!rows.length) return null;
+  return { mult: rows.reduce((s,j)=> s + j.actual/j.wax, 0)/rows.length, n: rows.length };
+}
+function jobTags(){ return [...new Set(jobs.flatMap(j=>j.tags||[]))].sort(); }
+
+function renderJobs(){
+  $('#job-count').textContent = `${jobs.length}件`;
+  const tags = jobTags();
+  $('#job-filter').innerHTML = tags.length
+    ? [`<button data-t="" class="${jobFilter?'':'on'}">すべて</button>`,
+       ...tags.map(t=>`<button data-t="${esc(t)}" class="${jobFilter===t?'on':''}">${esc(t)}</button>`)].join('')
+    : '';
+  $$('#job-filter button').forEach(b=> b.onclick = ()=>{ jobFilter=b.dataset.t; renderJobs(); });
+
+  const list = jobs.filter(j=> !jobFilter || (j.tags||[]).includes(jobFilter))
+                   .slice().sort((a,b)=> (b.date||'').localeCompare(a.date||''));
+  const box = $('#job-list'); box.innerHTML='';
+  if(!list.length){ box.innerHTML = `<p class="note">${jobs.length?'この条件の記録はありません。':
+    'まだ記録がありません。作ったもの・失敗したこと・仕上げの手順などを写真つきで残しておくと、あとで効いてきます。'}</p>`; }
+
+  list.forEach(j=>{
+    const i = jobs.indexOf(j);
+    const a = alloys.find(x=>x.id===j.alloy);
+    const meta = [ j.date, a?a.name:null, j.caster, j.qty>1?`${j.qty}個`:null ].filter(Boolean).join('　');
+    const nums = [];
+    if(j.wax>0 && j.actual>0) nums.push(`ワックス ${num(j.wax,2)}g → 実測 ${num(j.actual,2)}g（<b>×${num(j.actual/j.wax,1)}</b>）`);
+    else if(j.actual>0) nums.push(`上がり ${num(j.actual,2)}g`);
+    if(j.est>0 && j.actual>0){
+      const d = (j.actual/j.est-1)*100;
+      nums.push(`予想比 <span class="${d>0.5?'up':d<-0.5?'down':''}">${d>=0?'+':''}${d.toFixed(1)}%</span>`);
+    }
+    if(j.fee>0) nums.push(`工賃 ${yen(j.fee)}${j.estFee>0?`（見積 ${yen(j.estFee)}）`:''}`);
+
+    const d = document.createElement('div'); d.className='caster';
+    d.innerHTML = `<h3>${esc(j.title||'（無題）')}</h3>
+      <div class="meta">${esc(meta)}</div>
+      ${nums.length?`<div class="meta">${nums.join('　/　')}</div>`:''}
+      ${(j.tags||[]).length?`<div class="meta">${j.tags.map(t=>`<span class="pill">${esc(t)}</span>`).join(' ')}</div>`:''}
+      ${memoHTML(j.note)}
+      <div class="photos" data-ph="${i}"></div>
+      <div style="margin-top:8px"><button class="ghost e">編集</button> <button class="del x">削除</button></div>`;
+    d.querySelector('.e').onclick = ()=> openJob(i);
+    d.querySelector('.x').onclick = ()=>{
+      if(!confirm(`「${j.title||'無題'}」を削除しますか？${j.photos?.length?`（写真${j.photos.length}枚も消えます）`:''}`)) return;
+      (j.photos||[]).forEach(p=>{ DB.delPhoto(p.id); delete urlCache[p.id]; });
+      jobs.splice(i,1); save(K.jobs,jobs); renderJobs(); renderJobStats(); renderQuote();
+    };
+    box.appendChild(d);
+    renderPhotos(d.querySelector('[data-ph]'), j.photos);
+  });
+  renderJobStats();
+}
+
+function renderJobStats(){
+  const map = new Map();
+  jobs.forEach(j=>{
+    if(!(j.caster && j.alloy && j.wax>0 && j.actual>0)) return;
+    const k = j.caster+' '+j.alloy;
+    if(!map.has(k)) map.set(k, {caster:j.caster, alloy:j.alloy, r:[]});
+    map.get(k).r.push(j.actual/j.wax);
+  });
+  const tb = $('#job-stats tbody'); tb.innerHTML='';
+  [...map.values()].forEach(v=>{
+    const avg = v.r.reduce((s,x)=>s+x,0)/v.r.length;
+    const c = casters.find(x=>x.name===v.caster), a = alloys.find(x=>x.id===v.alloy);
+    const pub = c?.waxFactor?.[v.alloy] || 0;
+    const diff = pub ? (avg/pub-1)*100 : null;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${esc(v.caster)}</td><td>${esc(a?a.name:v.alloy)}</td>
+      <td class="num">${v.r.length}</td><td class="num"><b>×${num(avg,2)}</b></td>
+      <td class="num">${pub?'×'+num(pub,1):'—'}</td>
+      <td class="num ${diff>0.5?'up':diff<-0.5?'down':''}">${diff==null?'—':(diff>=0?'+':'')+diff.toFixed(1)+'%'}</td>`;
+    tb.appendChild(tr);
+  });
+  $('#job-stats-note').innerHTML = map.size
+    ? '見積タブでワックス重量から計算するとき、この実測値が公表値より優先されます。件数が増えるほど自分の作風に近づきます。'
+    : 'ワックス重量と実際の上がり重量の両方を記録すると、ここに自分の実測倍率が出ます。2〜3件あれば見積の精度が変わります。';
+}
+
+function openJob(i){
+  editingJob = i;
+  const j = i==null ? {date:today(), title:'', alloy:'', caster:'', qty:1, tags:[], note:'', photos:[]} : jobs[i];
+  $('#jf-title').textContent = i==null ? '記録の追加' : '記録の編集';
+  $('#jf-date').value=j.date||today(); $('#jf-title-in').value=j.title||'';
+  $('#jf-qty').value=j.qty||1;
+  $('#jf-alloy').innerHTML = '<option value="">（指定なし）</option>' +
+    alloys.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join('');
+  $('#jf-alloy').value = j.alloy||'';
+  $('#jf-caster').innerHTML = '<option value="">（指定なし）</option>' +
+    casters.map(c=>`<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('');
+  $('#jf-caster').value = j.caster||'';
+  $('#jf-wax').value=j.wax||''; $('#jf-est').value=j.est||''; $('#jf-actual').value=j.actual||'';
+  $('#jf-fee').value=j.fee||''; $('#jf-estfee').value=j.estFee||'';
+  $('#jf-tags').value=(j.tags||[]).join(', '); $('#jf-note').value=j.note||'';
+  $('#jf-numbers').open = !!(j.wax||j.actual||j.fee);
+  jobPhotos = JSON.parse(JSON.stringify(j.photos||[]));
+  drawJobPhotos(); jobCalcNote();
+  $('#job-form').classList.remove('hide');
+  $('#job-form').scrollIntoView({behavior:'smooth',block:'center'});
+}
+function drawJobPhotos(){
+  renderPhotos($('#jf-photos'), jobPhotos, id=>{
+    jobPhotos = jobPhotos.filter(p=>p.id!==id);
+    DB.delPhoto(id); delete urlCache[id]; drawJobPhotos();
+  });
+}
+function jobCalcNote(){
+  const w=val('#jf-wax'), e=val('#jf-est'), a=val('#jf-actual');
+  const out=[];
+  if(w>0 && a>0) out.push(`実効倍率 <b>×${num(a/w,2)}</b>（ワックス1gあたり ${num(a/w,2)}g）`);
+  if(e>0 && a>0) out.push(`予想との差 <b>${a>=e?'+':''}${num((a/e-1)*100,1)}%</b>`);
+  const f=val('#jf-fee'), ef=val('#jf-estfee');
+  if(f>0 && ef>0) out.push(`工賃の差 <b>${f>=ef?'+':''}${yen(f-ef)}</b>`);
+  $('#jf-calc').innerHTML = out.join('　/　');
+}
+['#jf-wax','#jf-est','#jf-actual','#jf-fee','#jf-estfee'].forEach(s=>
+  $(s).addEventListener('input', jobCalcNote));
+$('#add-job').onclick = ()=> openJob(null);
+$('#jf-cancel').onclick = ()=> $('#job-form').classList.add('hide');
+$('#jf-addphoto').onclick = ()=> $('#jf-photofile').click();
+$('#jf-photofile').onchange = async e=>{
+  for(const f of e.target.files){
+    const id = 'p'+Date.now()+Math.round(Math.random()*1e6);
+    DB.putPhoto(id, await shrink(f));
+    jobPhotos.push({id, name:f.name});
+  }
+  e.target.value=''; drawJobPhotos();
+};
+$('#jf-save').onclick = ()=>{
+  const j = {
+    date: $('#jf-date').value || today(),
+    title: $('#jf-title-in').value.trim(),
+    alloy: $('#jf-alloy').value, caster: $('#jf-caster').value,
+    qty: Math.max(1, val('#jf-qty')||1),
+    wax: val('#jf-wax'), est: val('#jf-est'), actual: val('#jf-actual'),
+    fee: val('#jf-fee'), estFee: val('#jf-estfee'),
+    tags: $('#jf-tags').value.split(',').map(t=>t.trim()).filter(Boolean),
+    note: $('#jf-note').value.trim(), photos: jobPhotos,
+  };
+  if(!j.title && !j.note && !j.photos.length && !j.actual){
+    alert('タイトル・メモ・写真・数値のどれかは入れてください'); return;
+  }
+  if(editingJob==null) jobs.push(j); else jobs[editingJob]=j;
+  save(K.jobs, jobs);
+  $('#job-form').classList.add('hide');
+  renderJobs(); renderQuote();
+};
+
+/* ---------- 見積 ---------- */
+function fillAlloySelects(){
+  const opts = alloys.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');
+  ['#q-alloy','#ref-alloy','#to-alloy'].forEach(s=>{ const el=$(s), cur=el.value; el.innerHTML=opts; if(cur) el.value=cur; });
+  if(!$('#ref-alloy').value) $('#ref-alloy').value='SV925';
+  if(!$('#q-alloy').value) $('#q-alloy').value='SV925';
+  if(!$('#to-alloy').value) $('#to-alloy').value='SV925';
+}
+/* 体積・重量 → 工賃見積 への受け渡し。押した時点の条件をそのまま持っていく */
+function handoffNote(){
+  const a = alloys.find(x=>x.id===$('#to-alloy').value);
+  const qty = Math.max(1, val('#qty')||1), waxMode = currentMode()==='wax';
+  if(!a){ $('#to-note').textContent=''; return; }
+  if(waxMode){
+    const w = val('#wax-g');
+    $('#to-note').innerHTML = w
+      ? `ワックス <b>${num(w,2)}g</b> × ${qty}個 を ${esc(a.name)} として送ります。上がり重量は鋳造屋ごとの換算倍率で計算されます。`
+      : 'ワックス原型の重量を入力してください。';
+  }else{
+    $('#to-note').innerHTML = lastVolume
+      ? `${esc(a.name)} <b>${num(lastVolume*a.density,2)}g</b> × ${qty}個（湯道 ${val('#loss')}%）を送ります。`
+      : '先に体積を入力してください。';
+  }
+}
+$('#to-quote').onclick = ()=>{
+  const a = alloys.find(x=>x.id===$('#to-alloy').value);
+  const waxMode = currentMode()==='wax', wax = val('#wax-g');
+  if(waxMode ? !wax : !lastVolume){ alert('先に体積（またはワックス重量）を入力してください'); return; }
+  $('#q-alloy').value = a.id;
+  $$('#q-mode button').forEach(b=> b.classList.toggle('on', b.dataset.m===(waxMode?'wax':'direct')));
+  if(waxMode){                                   // ワックス重量のまま渡す（換算は各店の倍率で）
+    $('#q-wt').value = wax.toFixed(2);
+    $('#q-waxd').value = val('#wax-d')||0.95;
+  }else{
+    $('#q-wt').value = (lastVolume*a.density).toFixed(2);
+  }
+  const qty = Math.max(1, val('#qty')||1);
+  $('#q-qty').value = qty; $('#q-loss').value = val('#loss');
+  const from = $('#q-from'); from.classList.remove('hide');
+  from.innerHTML = `「体積・重量」から取り込みました：<b>${esc(a.name)}</b> ／ ${
+    waxMode ? `ワックス ${num(wax,2)}g` : `${num(lastVolume*a.density,2)}g`} × ${qty}個`;
+  showTab('quote');
+  window.scrollTo({top:0, behavior:'smooth'});
+};
+$('#go-caster').onclick = ()=>{
+  showTab('settings');
+  const d = $('[data-block="caster.list"]'); if(d){ d.open = true; d.scrollIntoView({behavior:'smooth',block:'center'}); }
+};
+function casterFee(c, alloy, wProd, wTot, qty){
+  const rate = (c.alloyRates && c.alloyRates[alloy.id]) || c.rates[alloy.base] || 0;
+  const w = c.basis==='total' ? wTot : wProd;
+  const per = Math.max(c.pieceMin||0, c.piece + w*rate);
+  let fee = per*qty + c.setup;
+  if(c.tax==='in') fee = fee / (1 + (settings.tax||0)/100);  // 税抜に揃える
+  return {fee, w, rate, per, noRate: rate<=0};
+}
+function renderQuote(){
+  fillAlloySelects();
+  const a = alloys.find(x=>x.id===$('#q-alloy').value); if(!a) return;
+  const qMode = $('#q-mode button.on').dataset.m, inputG = val('#q-wt');
+  const waxD = val('#q-waxd')||0.95, theo = a.density/waxD;
+  const qty = Math.max(1, val('#q-qty')||1),
+        loss = 1+(val('#q-loss')||0)/100,
+        extra = val('#q-extra'), my = val('#q-my'), up = unitPrice(a), taxR = 1+(settings.tax||0)/100;
+  const other = (extra+my)*qty;
+
+  $('#q-wt-label').textContent = qMode==='wax' ? 'ワックス原型の重量／個 (g)' : '製品重量／個 (g)';
+  $('#q-waxd-box').classList.toggle('hide', qMode!=='wax');
+  $('#q-mode-note').innerHTML = qMode==='wax'
+    ? `ワックス ${num(inputG,2)}g から各店の公表倍率で上がり重量を出します。倍率が未登録の店は理論値
+       <b>${num(theo,1)}倍</b>（比重 ${num(a.density,2)} ÷ ワックス比重 ${num(waxD,2)}）を使います。`
+    : '入力した製品重量をそのまま全店に適用します。ワックス原型から見積もる場合は上のタブを切り替えてください。';
+
+  const rows = casters.map(c=>{
+    /* 倍率は 自分の実測 > 店の公表値 > 理論値 の順で採用する */
+    const meas = qMode==='wax' ? measuredFactor(c.name, a.id) : null;
+    const pub  = c.waxFactor?.[a.id] || 0;
+    const mult = qMode!=='wax' ? 0 : (meas ? meas.mult : (pub || theo));
+    const srcOf = !meas && !pub ? 'theory' : meas ? 'measured' : 'published';
+    const wProd = qMode==='wax' ? inputG*mult : inputG;
+    const wTot = wProd*loss;
+    const metalCost = wTot*qty*up;
+    const f = casterFee(c, a, wProd, wTot, qty);
+    const sub = f.fee + metalCost + other;
+    return {c, ...f, wProd, wTot, metalCost, mult, src:srcOf, n:meas?.n,
+            guessed: qMode==='wax' && srcOf==='theory', sub, tot: sub*taxR};
+  }).sort((x,y)=> (x.noRate-y.noRate) || (x.sub-y.sub));
+
+  const tb = $('#q-table tbody'); tb.innerHTML='';
+  $('#q-empty').classList.toggle('hide', casters.length>0);
+  rows.forEach((r,i)=>{
+    const best = i===0 && !r.noRate;
+    const tr=document.createElement('tr');
+    tr.innerHTML = `<td>${esc(r.c.name)}${best?' <span class="pill">最安</span>':''}
+        ${r.noRate?'<br><span style="font-size:11px;color:var(--danger)">この金種の単価が未登録</span>':''}</td>
+      <td class="num">${num(r.wProd,2)}${r.mult?`<br><span style="font-size:11px;color:${
+        r.src==='measured'?'var(--accent)':r.src==='theory'?'var(--danger)':'var(--muted)'}">×${num(r.mult,2)} ${
+        r.src==='measured'?`実測${r.n}件`:r.src==='theory'?'理論値':'公表'}</span>`:''}</td>
+      <td class="num">${num(r.w*qty,2)}</td>
+      <td class="num ${best?'best':''}">${r.noRate?'—':yen(r.fee)}</td>
+      <td class="num">${yen(r.metalCost)}</td><td class="num">${yen(other)}</td>
+      <td class="num">${r.noRate?'—':yen(r.sub)}</td><td class="num"><b>${r.noRate?'—':yen(r.tot)}</b></td>`;
+    tb.appendChild(tr);
+  });
+  const b = rows.filter(r=>!r.noRate)[0];
+  $('#q-detail').innerHTML = !b ? '—' : `
+    <table><tbody>
+      <tr><td>素材 / 個数</td><td>${esc(a.name)} × ${qty}個</td></tr>
+      ${b.mult?`<tr><td>ワックス ${num(inputG,2)} g × 換算倍率</td><td class="num">×${num(b.mult,2)}（${
+        b.src==='measured'?`<b>自分の実測 ${b.n}件</b>`:b.src==='theory'?'理論値':esc(b.c.name)+'の公表値'}）</td></tr>`:''}
+      <tr><td>上がり重量（1個 / 合計）</td><td class="num">${num(b.wProd,2)} g / ${num(b.wProd*qty,2)} g</td></tr>
+      <tr><td>湯道込み重量（合計）</td><td class="num">${num(b.wTot*qty,2)} g</td></tr>
+      <tr><td>地金単価</td><td class="num">${yen(up)} / g</td></tr>
+      <tr><td>地金代</td><td class="num">${yen(b.metalCost)}</td></tr>
+      <tr><td>工賃単価（${b.c.name}／${b.c.basis==='total'?'湯道込':'製品'}重量基準）</td><td class="num">${yen(b.rate)} / g</td></tr>
+      <tr><td>鋳造工賃（1個 / 合計・税抜）</td><td class="num">${yen(b.per)} / ${yen(b.fee)}</td></tr>
+      <tr><td>磨き・石留めなど</td><td class="num">${yen(extra*qty)}</td></tr>
+      <tr><td>デザイン料</td><td class="num">${yen(my*qty)}</td></tr>
+      <tr><td><b>合計（税抜）</b></td><td class="num"><b>${yen(b.sub)}</b></td></tr>
+      <tr><td><b>合計（税込 ${settings.tax}%）</b></td><td class="num"><b>${yen(b.tot)}</b></td></tr>
+      <tr><td>1個あたり（税込）</td><td class="num">${yen(b.tot/qty)}</td></tr>
+    </tbody></table>`;
+}
+$$('#q-mode button').forEach(b=> b.onclick = ()=>{
+  $$('#q-mode button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); renderQuote();
+});
+['#q-alloy','#q-qty','#q-wt','#q-waxd','#q-loss','#q-extra','#q-my'].forEach(s=>{
+  $(s).addEventListener('input', renderQuote); $(s).addEventListener('change', renderQuote);
+});
+
+/* ---------- 設定 ---------- */
+function renderSettings(){
+  $('#st-tax').value = settings.tax; $('#st-margin').value = settings.margin;
+  const over = load(K.aOver,{}), hide = load(K.aHide,[]);
+  const tb = $('#set-alloy tbody'); tb.innerHTML='';
+  const redraw = ()=>{ refreshAlloys(); renderSettings(); fillAlloySelects();
+                       renderAlloyPrice(); renderWeights(); renderQuote(); };
+  alloys.forEach(a=>{
+    const preset = isPreset(a.id), edited = preset && over[a.id] && Object.keys(over[a.id]).length;
+    const tr=document.createElement('tr');
+    tr.innerHTML = `
+      <td><input value="${esc(a.name)}" data-f="name">${
+        preset ? (edited?'<div class="tag edit">変更あり</div>':'') : '<div class="tag add">追加</div>'}</td>
+      <td><select data-f="base">${Object.keys(BASE).map(k=>`<option value="${k}"${a.base===k?' selected':''}>${BASE[k]}</option>`).join('')}</select></td>
+      <td><input type="number" step="0.0001" value="${a.purity}" data-f="purity"></td>
+      <td><input type="number" step="0.01" value="${a.pd||0}" data-f="pd"></td>
+      <td><input type="number" step="0.01" value="${a.density}" data-f="density"></td>
+      <td><input type="number" step="0.01" value="${a.factor||1}" data-f="factor"></td>
+      <td><input type="number" step="1" value="${a.fixed||''}" data-f="fixed"></td>
+      <td style="white-space:nowrap">${edited?'<button class="ghost rv" title="この行だけプリセットに戻す">戻す</button> ':''}<button class="del">×</button></td>`;
+    tr.querySelectorAll('[data-f]').forEach(el=> el.onchange = ()=>{
+      const f = el.dataset.f, v = (f==='name'||f==='base') ? el.value : (parseFloat(el.value)||0);
+      if(preset){                                   // プリセットは差分だけ保存する
+        const p = PRESET_ALLOYS.find(x=>x.id===a.id), o = load(K.aOver,{});
+        const d = o[a.id] || {};
+        if(JSON.stringify(v)===JSON.stringify(p[f])) delete d[f]; else d[f]=v;
+        if(Object.keys(d).length) o[a.id]=d; else delete o[a.id];
+        save(K.aOver, o);
+      }else{                                        // 自分で追加した素材は実体を書き換える
+        const add = load(K.aAdd,[]); const t = add.find(x=>x.id===a.id);
+        if(t){ t[f]=v; save(K.aAdd, add); }
+      }
+      redraw();
+    });
+    tr.querySelector('.rv')?.addEventListener('click', ()=>{
+      const o = load(K.aOver,{}); delete o[a.id]; save(K.aOver,o); redraw();
+    });
+    tr.querySelector('.del').onclick = ()=>{
+      if(preset){ save(K.aHide, [...hide, a.id]); }
+      else { save(K.aAdd, load(K.aAdd,[]).filter(x=>x.id!==a.id)); }
+      redraw();
+    };
+    tb.appendChild(tr);
+  });
+  const hidden = PRESET_ALLOYS.filter(a=>hide.includes(a.id));
+  $('#alloy-hidden').innerHTML = hidden.length
+    ? `非表示：${hidden.map(a=>`<button class="ghost sh" data-id="${a.id}">${esc(a.name)} を戻す</button>`).join(' ')}` : '';
+  $$('#alloy-hidden .sh').forEach(b=> b.onclick = ()=>{
+    save(K.aHide, load(K.aHide,[]).filter(x=>x!==b.dataset.id)); redraw();
+  });
+}
+$('#add-alloy').onclick = ()=>{
+  save(K.aAdd, [...load(K.aAdd,[]),
+    {id:'X'+Date.now(), name:'新しい素材', base:'other', purity:1, pd:0, density:10, factor:1, fixed:0}]);
+  refreshAlloys(); renderSettings(); fillAlloySelects(); renderWeights();
+};
+$('#reset-alloy').onclick = ()=>{
+  if(!confirm('プリセット素材への変更（数値の書き換え・非表示）を取り消します。自分で追加した素材はそのまま残ります。')) return;
+  drop(K.aOver); drop(K.aHide);
+  refreshAlloys(); renderSettings(); fillAlloySelects(); renderAlloyPrice(); renderWeights(); renderQuote();
+};
+$('#st-tax').onchange = ()=>{ settings.tax = val('#st-tax'); save(K.s,settings); renderQuote(); };
+$('#st-margin').onchange = ()=>{ settings.margin = val('#st-margin'); save(K.s,settings); syncPrices(); };
+
+/* 相場キャッシュ(jw_market)は再取得できるのでバックアップには含めない。
+   写真は data URL にして同梱するので、この1ファイルで完全に復元できる */
+const blobToDataURL = b => new Promise(r=>{ const f=new FileReader(); f.onload=()=>r(f.result); f.readAsDataURL(b); });
+const dataURLToBlob = async u => (await fetch(u)).blob();
+
+$('#export').onclick = async ()=>{
+  const btn = $('#export'); btn.disabled=true; btn.textContent='書き出し中…';
+  try{
+    const data = {}; for(const k of Object.keys(store)) if(k!==K.m) data[k] = store[k];
+    const photos = {};
+    if(!DB.disabled){
+      const {k,v} = await DB.allPhotos();
+      for(let i=0;i<k.length;i++) photos[k[i]] = await blobToDataURL(v[i]);
+    }
+    const out = { app:'jewelry-calc', version:1, exported:new Date().toISOString(), data, photos };
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(out)],{type:'application/json'}));
+    a.download = `jewelry-backup-${today()}.json`; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+    save('jw_lastBackup', today()); renderBackupNote();
+  }finally{ btn.disabled=false; btn.textContent='バックアップを書き出し'; }
+};
+$('#import-btn').onclick = ()=> $('#import-file').click();
+$('#import-file').onchange = async e=>{
+  const f = e.target.files[0]; e.target.value=''; if(!f) return;
+  if(!confirm('現在のデータを、読み込むファイルの内容で置き換えます。よろしいですか？')) return;
+  try{
+    const d = JSON.parse(await f.text());
+    const data = d.data || d;                       // 旧形式のバックアップも受ける
+    for(const k of Object.keys(data)) save(k, data[k]);
+    if(d.photos) for(const id of Object.keys(d.photos)) DB.putPhoto(id, await dataURLToBlob(d.photos[id]));
+    loadState(); await initRender(); alert('読み込みました');
+  }catch(err){ alert('読み込めませんでした：'+err.message); }
+};
+$('#wipe').onclick = async ()=>{
+  if(!confirm('鋳造屋・写真・相場履歴・設定をすべて削除します。元に戻せません。よろしいですか？')) return;
+  await DB.clear();
+  Object.keys(localStorage).forEach(k=>{ if(k.startsWith('jw_')) localStorage.removeItem(k); });
+  location.reload();
+};
+function renderBackupNote(){
+  const last = load('jw_lastBackup', null);
+  const days = last ? Math.floor((Date.parse(today())-Date.parse(last))/86400000) : null;
+  $('#backup-note').innerHTML = DB.disabled
+    ? '⚠ このブラウザでは IndexedDB が使えないため、写真は保存できません。データは localStorage に入ります。'
+    : last
+      ? `最後のバックアップ：${last}${days>=14?`（<b>${days}日前</b>。溜めた知識を失わないよう書き出しておいてください）`:`（${days}日前）`}`
+      : '<b>まだバックアップしていません。</b>ブラウザのデータを消すと全部消えます。書き出したファイルはクラウド同期フォルダに置くのが安全です。';
+}
+
+/* ---------- 起動 ---------- */
+async function initRender(){
+  /* ファビコンはインラインSVGから作る。タブの背景が明暗どちらでも見えるよう金色で描く */
+  const sv = $('#logo').cloneNode(true);
+  sv.removeAttribute('id'); sv.setAttribute('width','64'); sv.setAttribute('height','64');
+  sv.innerHTML = sv.innerHTML.replace(/currentColor/g, '#a8802a');
+  const fav = document.createElement('link'); fav.rel='icon';
+  fav.href = 'data:image/svg+xml,' + encodeURIComponent(new XMLSerializer().serializeToString(sv));
+  document.head.appendChild(fav);
+  $('nav').style.top = $('header').offsetHeight + 'px';   // ヘッダーの実寸に追従させる
+  const d = new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
+  $('#price-date').textContent = d;
+  fillAlloySelects(); renderShapeFields(); renderCasters(); renderJobs();
+  renderSettings(); renderBackupNote();
+  renderProfile(); renderBlocks(); applyBlocks();
+  syncPrices();          // 保存済みデータで即描画
+  fetchMarket();         // その裏で最新を取得（1日1回）
+}
+(async ()=>{
+  await initStore(); loadState(); await initRender();
+  if(load(K.prof, null) === null) askProfile();   // 初回のみ作り方を尋ねる
+})();
+</script>
+</body>
+</html>
