@@ -90,6 +90,15 @@ textarea::placeholder{color:var(--muted);opacity:.65}
   border-top:1px solid var(--line);padding-top:10px}
 .note-item .photos{margin-top:10px}
 .mele{background:var(--accent-soft);border-radius:8px;padding:10px;margin:0 0 10px}
+.cuts{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:10px;margin-bottom:12px}
+.cut{margin:0;text-align:center;border:1px solid var(--line);border-radius:8px;
+  padding:8px 4px;background:var(--card)}
+.cut svg{width:100%;max-width:62px;height:auto;color:var(--fg);display:block;margin:0 auto}
+.cut figcaption{margin-top:5px;line-height:1.35}
+.cut figcaption b{display:block;font-size:11px;font-weight:600}
+.cut figcaption span{display:block;font-size:9.5px;color:var(--muted);letter-spacing:.02em}
+table.cutf{font-size:13px}
+table.cutf td:first-child{white-space:nowrap}
 .alloy .body .acts{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px;
   border-top:1px solid var(--line);padding-top:10px}
 input[type=number]{text-align:right}
@@ -796,7 +805,7 @@ const PRESET_ALLOYS = [
 /* ---- プリセット層：はじめから入っている覚書。アプリ更新で差し替わる ----
    数値はいずれも目安。地金商・ロット・道具で変わるので、各自で書き換えて使う前提。 */
 const PRESET_NOTES = [
-  { id:'p.mele', title:'ダイヤ（メレ）の直径とカラット', tags:['石','数値'], calc:'mele',
+  { id:'p.mele', title:'ダイヤの寸法・カラット・カットの種類', tags:['石','数値'], calc:'mele', gallery:'cuts',
     body:`ラウンドブリリアントの目安。カット比率で前後するので発注前に確認すること。
 
   1.0mm≒0.005ct    1.3mm≒0.008ct    1.5mm≒0.012ct
@@ -856,7 +865,7 @@ const PRESET_NOTES = [
 かけると、消え残りが分かりやすい。
 番手を飛ばすと最後まで傷が残るので急がないこと。` },
 
-  { id:'p.ringsize', title:'リングサイズ（号数）と内径', tags:['リング','数値'],
+  { id:'p.ringsize', title:'リングサイズ（号数）と内径', tags:['リング','数値'], calc:'ring',
     body:`日本規格：内周(mm) = 号数 + 40　／　内径 = 内周 ÷ π
 
   1号 内径13.0mm    5号 14.3mm    9号 15.6mm
@@ -1604,7 +1613,8 @@ function renderNotes(){
         ${n.preset ? (edited?'<span class="tag edit">書換え</span>':'') : '<span class="tag add">自分の</span>'}
       </summary>
       <div class="note-body">
-        ${n.calc==='mele' ? meleCalcHTML() : ''}
+        ${n.calc==='mele' ? meleCalcHTML() : n.calc==='ring' ? ringCalcHTML() : ''}
+        ${n.gallery==='cuts' ? cutsHTML() : ''}
         <div class="memo" style="background:var(--card)">${esc(n.body||'')}</div>
         <div class="photos" data-np="${esc(n.id)}"></div>
         <div class="acts">
@@ -1629,6 +1639,7 @@ function renderNotes(){
     box.appendChild(d);
     renderPhotos(d.querySelector('[data-np]'), n.photos);
     if(n.calc==='mele') bindMele(d);
+    if(n.calc==='ring') bindRing(d);
   });
 
   const hidden = PRESET_NOTES.filter(n=>hide.includes(n.id));
@@ -1637,6 +1648,74 @@ function renderNotes(){
   $$('#note-hidden .sh').forEach(b=> b.onclick = ()=>{
     save(K.nHide, load(K.nHide,[]).filter(x=>x!==b.dataset.id)); refreshNotes(); renderNotes();
   });
+}
+
+/* 石のカット図（線画・自作）。currentColor なので明暗どちらでも見える */
+const CUTS = [
+  { n:'ラウンドブリリアント', e:'Round brilliant', f:0.0061, note:'最も一般的。メレはほぼこれ',
+    d:`<circle cx="30" cy="30" r="26"/>
+       <path d="M22 17h16l5 5v16l-5 5H22l-5-5V22z"/>
+       <path d="M30 17V4M43 30h13M30 43v13M17 30H4"/>
+       <path d="M40.5 19.5 48.4 11.6M40.5 40.5l7.9 7.9M19.5 40.5l-7.9 7.9M19.5 19.5 11.6 11.6"/>` },
+  { n:'オーバル', e:'Oval', f:0.0062, note:'指を長く見せる。縦横比1.35前後が定番',
+    d:`<ellipse cx="30" cy="30" rx="18" ry="26"/><ellipse cx="30" cy="30" rx="10" ry="15"/>
+       <path d="M30 4v11M30 56V45M12 30h8M48 30h-8M17 12l6 8M43 12l-6 8M17 48l6-8M43 48l-6-8"/>` },
+  { n:'ペアシェイプ', e:'Pear', f:0.00615, note:'雫型。先端が欠けやすいので覆輪や爪で守る',
+    d:`<path d="M30 5c10 11 18 23 18 33a18 18 0 0 1-36 0c0-10 8-22 18-33z"/>
+       <ellipse cx="30" cy="38" rx="10" ry="11"/><path d="M30 5v22M20 27 12 22M40 27l8-5M20 49l-6 6M40 49l6 6M30 49v7"/>` },
+  { n:'マーキス', e:'Marquise', f:0.00565, note:'舟形。両端が最も欠けやすい',
+    d:`<path d="M30 5c12 12 16 21 16 25s-4 13-16 25C18 43 14 34 14 30s4-13 16-25z"/>
+       <ellipse cx="30" cy="30" rx="8" ry="14"/><path d="M30 5v11M30 55V44M14 30h8M46 30h-8M20 18l4 6M40 18l-4 6M20 42l4-6M40 42l-4-6"/>` },
+  { n:'ハートシェイプ', e:'Heart', f:0.0059, note:'左右対称に磨くのが難しく割高',
+    d:`<path d="M30 54C10 38 8 24 16 16c6-6 12-4 14 2 2-6 8-8 14-2 8 8 6 22-14 38z"/>
+       <path d="M30 18v20M18 24l12 14M42 24 30 38M14 32h32"/>` },
+  { n:'エメラルド', e:'Emerald', f:0.0080, note:'ステップカット。内包物が目立つので透明度重視',
+    d:`<path d="M20 6h20l10 10v28l-10 10H20L10 44V16z"/><path d="M23 12h14l7 7v22l-7 7H23l-7-7V19z"/>
+       <path d="M26 18h8l4 4v16l-4 4h-8l-4-4V22z"/>` },
+  { n:'バゲット', e:'Baguette', f:0.00915, note:'脇石の定番。テーパードは台形',
+    d:`<rect x="14" y="8" width="32" height="44"/><rect x="19" y="13" width="22" height="34"/>
+       <path d="M14 8l5 5M46 8l-5 5M14 52l5-5M46 52l-5-5"/>` },
+  { n:'プリンセス（角）', e:'Princess', f:0.0083, note:'角が欠けやすい。爪で四隅を覆う',
+    d:`<rect x="8" y="8" width="44" height="44"/><rect x="20" y="20" width="20" height="20"/>
+       <path d="M8 8l12 12M52 8 40 20M52 52 40 40M8 52l12-12M30 8v12M52 30H40M30 52V40M8 30h12"/>` },
+  { n:'スクエア（角丸）', e:'Modified square', f:0.0083, note:'四隅を落として欠けにくくしたもの',
+    d:`<path d="M16 8h28l8 8v28l-8 8H16l-8-8V16z"/><rect x="21" y="21" width="18" height="18"/>
+       <path d="M16 8l5 13M44 8l-5 13M44 52l-5-13M16 52l5-13M30 8v13M52 30H39M30 52V39M8 30h13"/>` },
+];
+function cutsHTML(){
+  return `<div class="cuts">${CUTS.map(c=>`
+    <figure class="cut">
+      <svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1.1"
+           stroke-linejoin="round" aria-hidden="true">${c.d}</svg>
+      <figcaption><b>${c.n}</b><span>${c.e}</span></figcaption>
+    </figure>`).join('')}</div>
+  <div class="scroll"><table class="cutf"><thead><tr>
+      <th>カット</th><th>重さの目安</th><th>覚え書き</th></tr></thead><tbody>${
+    CUTS.map(c=>`<tr><td>${c.n}</td><td class="num">縦×横×深さ×${c.f}</td>
+      <td style="font-size:12px">${c.note}</td></tr>`).join('')}</tbody></table></div>
+  <p class="note">重さの目安は寸法をmmで掛けた概算（ct）。ラウンドは縦＝横なので 直径²×深さ×0.0061。
+    深さが分からないときは、ラウンドで直径の約60%が標準です。研磨の深さで実際は前後します。</p>`;
+}
+
+/* 号数 ↔ 内径 ↔ 内周 */
+function ringCalcHTML(){
+  return `<div class="row mele" style="margin-bottom:10px">
+    <div><label>号数</label><input type="number" class="r-go" step="0.5" value="11"></div>
+    <div><label>内径 (mm)</label><input type="number" class="r-d" step="0.01" value="16.23"></div>
+    <div><label>内周 (mm)</label><input type="number" class="r-c" step="0.1" value="51"></div>
+    <div style="flex:2 1 100%"><span class="note r-out" style="margin:0"></span></div>
+  </div>`;
+}
+function bindRing(root){
+  const go=root.querySelector('.r-go'), d=root.querySelector('.r-d'),
+        c=root.querySelector('.r-c'), out=root.querySelector('.r-out');
+  const show = n => { out.innerHTML = n>0
+    ? `<b>${num(n,1)}号</b> ＝ 内周 ${num(n+40,1)}mm ／ 内径 ${num((n+40)/Math.PI,2)}mm
+       　<span style="opacity:.75">幅4mm以上や甲丸は +0.5〜1号 を見込む</span>` : ''; };
+  go.oninput = ()=>{ const n=parseFloat(go.value)||0; if(n>0){ d.value=((n+40)/Math.PI).toFixed(2); c.value=(n+40).toFixed(1); } show(n); };
+  d.oninput  = ()=>{ const v=parseFloat(d.value)||0; const n=v*Math.PI-40; if(v>0){ go.value=n.toFixed(1); c.value=(v*Math.PI).toFixed(1); } show(n); };
+  c.oninput  = ()=>{ const v=parseFloat(c.value)||0; const n=v-40; if(v>0){ go.value=n.toFixed(1); d.value=(v/Math.PI).toFixed(2); } show(n); };
+  show(parseFloat(go.value)||0);
 }
 
 function meleCalcHTML(){
