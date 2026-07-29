@@ -21,6 +21,8 @@ body{margin:0;font-family:-apple-system,"Segoe UI","Hiragino Kaku Gothic ProN","
 header{padding:10px 16px;border-bottom:1px solid var(--line);background:var(--card);
        display:flex;align-items:center;gap:11px;position:sticky;top:0;z-index:10}
 header #logo{width:38px;height:38px;flex:none;display:block;color:var(--fg)}
+header #brand-logo{width:38px;height:38px;flex:none;display:block;object-fit:contain}
+@media (prefers-color-scheme: dark){ header #brand-logo{filter:invert(1)} }
 header .brand{display:flex;flex-direction:column;gap:1px;min-width:0}
 header h1{font-size:19px;margin:0;letter-spacing:.14em;font-weight:600;line-height:1.15}
 header .sub{color:var(--muted);font-size:10px;letter-spacing:.22em}
@@ -103,7 +105,8 @@ textarea::placeholder{color:var(--muted);opacity:.65}
 #invoice .to .nm{font-size:17px;border-bottom:1px solid #222;padding-bottom:4px;margin-bottom:10px}
 #invoice .from{flex:0 0 auto;text-align:left;font-size:12px;white-space:pre-wrap;position:relative;
   padding-left:52px;min-height:46px}
-#invoice .from .lg{position:absolute;left:0;top:2px;width:42px;height:42px;color:#222}
+#invoice .from .lg{position:absolute;left:0;top:2px;width:42px;height:42px;object-fit:contain}
+#invoice .from.nologo{padding-left:0;min-height:0}
 #invoice .from b{font-size:14px}
 #invoice .sum{margin:20px 0 6px;font-size:15px}
 #invoice .sum .amt{display:inline-block;border-bottom:2px solid #222;font-size:22px;
@@ -719,13 +722,28 @@ details.card[open]>summary::before{content:'▾ '}
     <p class="note">上乗せ率は「国際スポット → 国内店頭価格」の差を埋めるための補正です。過去の実績から逆算して設定してください。</p>
   </div>
 
-  <details class="card" data-block="quote.sell">
-    <summary>見積書の設定（屋号・連絡先・既定の掛け率）</summary>
+  <details class="card">
+    <summary>屋号・ロゴ・連絡先 <span class="pill" id="iv-n"></span></summary>
     <div style="margin-top:12px">
       <div class="row">
-        <div style="flex:2 1 220px"><label>屋号・氏名</label><input type="text" id="iv-name" placeholder="KOTODAMA"></div>
+        <div style="flex:2 1 220px"><label>屋号・ブランド名・氏名</label>
+          <input type="text" id="iv-name" placeholder="例：〇〇工房 / 山田太郎"></div>
         <div><label>既定の掛け率</label><input type="number" id="iv-mult" step="0.1" value="2.5"></div>
         <div><label>既定の有効期限（日）</label><input type="number" id="iv-days" value="14"></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div style="flex:0 0 auto"><label>ロゴ</label>
+          <div id="iv-logo-box" class="photos"></div></div>
+        <div style="flex:2 1 240px;display:flex;flex-direction:column;justify-content:flex-end;gap:6px">
+          <div class="inline">
+            <button class="ghost" id="iv-logo-add">ロゴ画像を選ぶ</button>
+            <input type="file" id="iv-logo-file" accept="image/*" class="hide">
+            <button class="del hide" id="iv-logo-del">削除</button>
+          </div>
+          <label class="sw"><input type="checkbox" id="iv-header">
+            <span>アプリの上部にも自分の屋号とロゴを表示する</span></label>
+          <p class="note" style="margin:0">白背景の画像は自動で背景を抜きます。長辺256pxに縮小して保存します。</p>
+        </div>
       </div>
       <div class="row" style="margin-top:10px">
         <div style="flex:2 1 260px"><label>連絡先（住所・電話・メールなど／改行できます）</label>
@@ -733,7 +751,8 @@ details.card[open]>summary::before{content:'▾ '}
         <div style="flex:2 1 260px"><label>見積書に毎回入れる文言</label>
           <textarea id="iv-terms" rows="3" placeholder="例）お支払いは銀行振込にてお願いいたします。&#10;例）ご注文後のキャンセルはお受けできません。"></textarea></div>
       </div>
-      <p class="note">ここで入れた内容が見積書の発行者欄と備考に入ります。ロゴも自動で入ります。</p>
+      <p class="note">ここで入れた屋号・ロゴ・連絡先が、見積書の発行者欄に入ります。
+        <b>設定しないと発行者欄は空のまま</b>なので、お客様に出す前に必ず入れてください。</p>
     </div>
   </details>
 
@@ -2262,9 +2281,8 @@ function invoiceHTML(){
         <div class="nm">${to?esc(to)+' '+esc(hon):'&nbsp;'}</div>
         <div>下記のとおりお見積り申し上げます。</div>
       </div>
-      <div class="from">
-        <svg class="lg" viewBox="180.15 285.08 224.73 224.73" fill="currentColor">${
-          $('#logo').innerHTML}</svg>
+      <div class="from${iv.logo?'':' nologo'}">
+        ${iv.logo?`<img class="lg" src="${iv.logo}" alt="">`:''}
         <b>${esc(iv.name||'')}</b>\n${esc(iv.contact||'')}
       </div>
     </div>
@@ -2387,18 +2405,53 @@ $('#reset-alloy').onclick = ()=>{
   drop(K.aOver); drop(K.aHide);
   refreshAlloys(); renderSettings(); fillAlloySelects(); renderAlloyPrice(); renderWeights(); renderQuote();
 };
-/* 見積書の発行者設定 */
+/* 発行者（屋号・ロゴ・連絡先）の設定。見積書とアプリ上部で使う */
+function saveInvoice(patch){
+  const iv = { ...load(K.inv, {mult:2.5, days:14}), ...patch };
+  save(K.inv, iv); return iv;
+}
 function renderInvoiceSettings(){
   const iv = load(K.inv, {mult:2.5, days:14});
   $('#iv-name').value = iv.name||''; $('#iv-contact').value = iv.contact||'';
   $('#iv-terms').value = iv.terms||''; $('#iv-mult').value = iv.mult||2.5; $('#iv-days').value = iv.days||14;
+  $('#iv-header').checked = !!iv.useHeader;
   $('#s-mult').value = iv.mult||2.5; $('#s-days').value = iv.days||14;   // 見積欄の既定値にも反映
+  $('#iv-n').textContent = iv.name ? '設定済み' : '未設定';
+  $('#iv-logo-box').innerHTML = iv.logo
+    ? `<figure><img src="${iv.logo}" alt="ロゴ"></figure>`
+    : '<p class="note" style="margin:0">未設定</p>';
+  $('#iv-logo-del').classList.toggle('hide', !iv.logo);
+  applyBrand();
+}
+/* 屋号とロゴをアプリ上部に反映（未設定ならアプリ既定のまま） */
+function applyBrand(){
+  const iv = load(K.inv, {});
+  const on = iv.useHeader && (iv.name || iv.logo);
+  $('header h1').textContent = on && iv.name ? iv.name : '金工手帖';
+  $('header .sub').textContent = on && iv.name ? '金工手帖' : '相場・見積・記録';
+  const old = $('#brand-logo'); if(old) old.remove();
+  $('#logo').classList.toggle('hide', !!(on && iv.logo));
+  if(on && iv.logo){
+    const im = document.createElement('img');
+    im.id='brand-logo'; im.src=iv.logo; im.alt='';
+    $('#logo').insertAdjacentElement('afterend', im);
+  }
 }
 ['#iv-name','#iv-contact','#iv-terms','#iv-mult','#iv-days'].forEach(x=> $(x).onchange = ()=>{
-  save(K.inv, { name:$('#iv-name').value.trim(), contact:$('#iv-contact').value.trim(),
+  saveInvoice({ name:$('#iv-name').value.trim(), contact:$('#iv-contact').value.trim(),
                 terms:$('#iv-terms').value.trim(), mult:val('#iv-mult')||2.5, days:val('#iv-days')||14 });
-  renderSell();
+  renderInvoiceSettings(); renderSell();
 });
+$('#iv-header').onchange = ()=>{ saveInvoice({useHeader:$('#iv-header').checked}); renderInvoiceSettings(); };
+$('#iv-logo-add').onclick = ()=> $('#iv-logo-file').click();
+$('#iv-logo-file').onchange = async e=>{
+  const f = e.target.files[0]; e.target.value=''; if(!f) return;
+  const blob = await shrink(f, 256, 0.92);
+  const fr = new FileReader();
+  fr.onload = ()=>{ saveInvoice({logo: fr.result}); renderInvoiceSettings(); };
+  fr.readAsDataURL(blob);
+};
+$('#iv-logo-del').onclick = ()=>{ saveInvoice({logo:''}); renderInvoiceSettings(); };
 $('#st-tax').onchange = ()=>{ settings.tax = val('#st-tax'); save(K.s,settings); renderQuote(); };
 $('#st-margin').onchange = ()=>{ settings.margin = val('#st-margin'); save(K.s,settings); syncPrices(); };
 
