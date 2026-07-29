@@ -104,8 +104,6 @@ textarea::placeholder{color:var(--muted);opacity:.65}
 #invoice .to{flex:1 1 auto;min-width:0}
 #invoice .to .nm{font-size:17px;border-bottom:1px solid #222;padding-bottom:4px;margin-bottom:10px}
 #invoice .from{flex:0 0 auto;text-align:left;font-size:12px;white-space:pre-wrap}
-#invoice .foot{margin-top:18px;text-align:right}
-#invoice .foot .lg{width:56px;height:56px;object-fit:contain;display:inline-block}
 #invoice .from b{font-size:14px}
 #invoice .sum{margin:20px 0 6px;font-size:15px}
 #invoice .sum .amt{display:inline-block;border-bottom:2px solid #222;font-size:22px;
@@ -118,8 +116,10 @@ textarea::placeholder{color:var(--muted);opacity:.65}
 #invoice .meta{margin-top:16px;font-size:12px}
 #invoice .meta dt{float:left;clear:left;width:6.5em;color:#555}
 #invoice .meta dd{margin:0 0 3px 7em}
-#invoice .rem{margin-top:14px;font-size:11.5px;color:#444;white-space:pre-wrap;
-  border-top:1px solid #ddd;padding-top:10px}
+#invoice .rem-wrap{margin-top:14px;border-top:1px solid #ddd;padding-top:10px;
+  display:flex;gap:18px;align-items:flex-end}
+#invoice .rem{flex:1 1 auto;min-width:0;font-size:11.5px;color:#444;white-space:pre-wrap}
+#invoice .rem-wrap .lg{flex:none;width:56px;height:56px;object-fit:contain}
 @media (max-width:640px){ #invoice{padding:20px 16px;margin:10px;font-size:12px}
   #invoice .head{flex-direction:column;gap:14px} #invoice .ttl{font-size:20px} }
 @media print{
@@ -2302,8 +2302,10 @@ function invoiceHTML(){
       <dt>有効期限</dt><dd>${jd(exp)}</dd>
       ${$('#s-lead').value.trim()?`<dt>納期の目安</dt><dd>${esc($('#s-lead').value.trim())}</dd>`:''}
     </dl>
-    <div class="rem">${esc(notes)}</div>
-    ${iv.logo?`<div class="foot"><img class="lg" src="${iv.logo}" alt=""></div>`:''}`;
+    <div class="rem-wrap">
+      <div class="rem">${esc(notes)}</div>
+      ${iv.logo?`<img class="lg" src="${iv.logo}" alt="">`:''}
+    </div>`;
 }
 $('#make-invoice').onclick = ()=>{
   if(!lastQuote){ alert('先に素材と重量を入れてください'); return; }
