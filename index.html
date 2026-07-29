@@ -180,8 +180,8 @@ details.card[open]>summary::before{content:'▾ '}
   <button data-t="price" class="on">相場</button>
   <button data-t="calc"   data-block="tab.calc">目方</button>
   <button data-t="quote"  data-block="tab.quote">工賃</button>
-  <button data-t="notes"  data-block="tab.notes">覚書</button>
   <button data-t="jobs"   data-block="tab.jobs">手控</button>
+  <button data-t="notes"  data-block="tab.notes">覚書</button>
   <button data-t="settings">設え</button>
 </nav>
 
@@ -525,20 +525,20 @@ details.card[open]>summary::before{content:'▾ '}
 
 <!-- ============ 設定 ============ -->
 <section id="settings">
-  <div class="card">
-    <h2>作り方のタイプ</h2>
-    <div class="chip" id="profile-chip"></div>
-    <p class="note" id="profile-note"></p>
-  </div>
-
-  <div class="card">
-    <h2>表示する機能</h2>
-    <div id="block-list"></div>
-    <div class="inline" style="margin-top:10px">
-      <button class="ghost" id="reset-blocks">タイプの初期状態に戻す</button>
+  <details class="card">
+    <summary>素材（比重・純度・係数） <span class="pill" id="alloy-n"></span></summary>
+    <div style="margin-top:12px">
+      <div id="alloy-list"></div>
+      <p class="note" id="alloy-hidden"></p>
+      <div class="inline" style="margin-top:10px">
+        <button class="ghost" id="add-alloy">＋ 素材を追加</button>
+        <button class="ghost" id="reset-alloy">プリセットへの変更を取り消す</button>
+      </div>
+      <p class="note">固定単価を入れた素材は、相場ではなくその値で計算します（真鍮・地金商の提示価格など）。<br>
+        使わない金種は「この素材を非表示」で消せます。変更したところだけが保存されるので、
+        アプリを更新しても新しい金種は届き、あなたの調整は残ります。</p>
     </div>
-    <p class="note">使わない機能を消しても、データは残ります。あとで戻せば元どおり表示されます。</p>
-  </div>
+  </details>
 
   <details class="card" data-block="caster.list">
     <summary>鋳造屋の登録・料金設定 <span class="pill" id="caster-n"></span></summary>
@@ -612,17 +612,20 @@ details.card[open]>summary::before{content:'▾ '}
   </div>
     </div>
   </details>
+
   <div class="card">
-    <h2>素材（比重・純度・係数）</h2>
-    <div id="alloy-list"></div>
-    <p class="note" id="alloy-hidden"></p>
+    <h2>作り方のタイプ</h2>
+    <div class="chip" id="profile-chip"></div>
+    <p class="note" id="profile-note"></p>
+  </div>
+
+  <div class="card">
+    <h2>表示する機能</h2>
+    <div id="block-list"></div>
     <div class="inline" style="margin-top:10px">
-      <button class="ghost" id="add-alloy">＋ 素材を追加</button>
-      <button class="ghost" id="reset-alloy">プリセットへの変更を取り消す</button>
+      <button class="ghost" id="reset-blocks">タイプの初期状態に戻す</button>
     </div>
-    <p class="note">固定単価を入れた素材は、相場ではなくその値で計算します（真鍮・地金商の提示価格など）。<br>
-      使わない金種は「×」で非表示にできます。変更したところだけが保存されるので、
-      アプリを更新しても新しい金種は届き、あなたの調整は残ります。</p>
+    <p class="note">使わない機能を消しても、データは残ります。あとで戻せば元どおり表示されます。</p>
   </div>
 
   <div class="card">
@@ -916,8 +919,8 @@ const BLOCKS = [
   {id:'tab.calc',    g:'綴じ',         n:'目方（体積・重量）'},
   {id:'tab.quote',   g:'綴じ',         n:'工賃（見積・比較）'},
   {id:'caster.list', g:'設え',         n:'鋳造屋の登録'},
-  {id:'tab.notes',   g:'綴じ',         n:'覚書（調べもの）'},
   {id:'tab.jobs',    g:'綴じ',         n:'手控（作業の記録）'},
+  {id:'tab.notes',   g:'綴じ',         n:'覚書（調べもの）'},
   {id:'jobs.stats',  g:'手控',         n:'実測から出た換算倍率'},
   {id:'price.chart', g:'相場',           n:'推移グラフ'},
   {id:'price.alloy', g:'相場',           n:'素材別の地金単価'},
@@ -2100,6 +2103,7 @@ function renderSettings(){
   $('#st-tax').value = settings.tax; $('#st-margin').value = settings.margin;
   const over = load(K.aOver,{}), hide = load(K.aHide,[]);
   const box = $('#alloy-list'); box.innerHTML='';
+  $('#alloy-n').textContent = `${alloys.length}種`;
   const redraw = ()=>{ refreshAlloys(); renderSettings(); fillAlloySelects();
                        renderAlloyPrice(); renderWeights(); renderQuote(); };
   alloys.forEach(a=>{
