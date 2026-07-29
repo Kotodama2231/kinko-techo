@@ -130,6 +130,8 @@ textarea::placeholder{color:var(--muted);opacity:.65}
 #invoice .meta{margin-top:16px;font-size:12px}
 #invoice .meta dt{float:left;clear:left;width:6.5em;color:#555}
 #invoice .meta dd{margin:0 0 3px 7em}
+#invoice .bank{margin-top:14px;border:1px solid #bbb;background:#f7f5f0;padding:9px 12px;
+  font-size:12px;white-space:pre-wrap;border-radius:3px}
 #invoice .rem-wrap{margin-top:14px;border-top:1px solid #ddd;padding-top:10px;
   display:flex;gap:18px;align-items:flex-end}
 #invoice .rem{flex:1 1 auto;min-width:0;font-size:11.5px;color:#444;white-space:pre-wrap}
@@ -222,6 +224,9 @@ details.fold>summary:hover{color:var(--accent)}
 details.fold>*:not(summary){margin-left:13px;margin-right:13px}
 details.fold>summary+*{margin-top:12px}
 details.fold[open]{padding-bottom:12px}
+button.link{background:none;border:none;padding:0;color:var(--accent);cursor:pointer;
+  font-size:inherit;font-family:inherit;text-decoration:underline;text-underline-offset:2px}
+button.link:hover{opacity:.75}
 .sw{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin:0;cursor:pointer}
 .sw input{width:auto}
 .spin{display:inline-block;width:11px;height:11px;border:2px solid var(--line);border-top-color:var(--accent);
@@ -246,7 +251,7 @@ details.fold[open]{padding-bottom:12px}
   <button data-t="price" class="on">相場</button>
   <button data-t="calc"   data-block="tab.calc">目方</button>
   <button data-t="quote"  data-block="tab.quote">工賃</button>
-  <button data-t="est"    data-block="tab.est">見積</button>
+  <button data-t="est"    data-block="tab.est">書付</button>
   <button data-t="jobs"   data-block="tab.jobs">手控</button>
   <button data-t="notes"  data-block="tab.notes">覚書</button>
   <button data-t="settings">設え</button>
@@ -513,6 +518,7 @@ details.fold[open]{padding-bottom:12px}
     </tr></thead><tbody></tbody></table></div>
     <div class="inline" style="margin-top:10px">
       <button class="ghost" id="est-add">＋ 明細を追加</button>
+      <button class="ghost" id="est-stone">＋ 石を入れる</button>
       <button class="ghost" id="est-ship">＋ 送料・梱包</button>
       <button class="del" id="est-clear">全部消す</button>
     </div>
@@ -523,22 +529,43 @@ details.fold[open]{padding-bottom:12px}
 
   <div class="card">
     <h2>宛先と条件</h2>
+    <div class="chip" id="kind-chip">
+      <button data-k="quote" class="on">御見積書</button>
+      <button data-k="invoice">御請求書</button>
+      <button data-k="delivery">納品書</button>
+    </div>
     <div class="row">
-      <div style="flex:2 1 220px"><label>宛名</label><input type="text" id="s-to" placeholder="山田 太郎"></div>
+      <div style="flex:2 1 200px"><label>お客様（控えから選ぶ）</label><select id="s-cust"></select></div>
+      <div style="flex:2 1 200px"><label>宛名</label><input type="text" id="s-to" placeholder="山田 太郎"></div>
       <div><label>敬称</label><select id="s-hon">
         <option>様</option><option>御中</option><option value="">（なし）</option></select></div>
-      <div><label>有効期限（日）</label><input type="number" id="s-days" value="14"></div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div id="box-days"><label>有効期限（日）</label><input type="number" id="s-days" value="14"></div>
+      <div id="box-due" class="hide"><label>支払期限（日）</label><input type="number" id="s-due" value="30"></div>
+      <div id="box-deliv" class="hide"><label>納品日</label><input type="date" id="s-deliv"></div>
       <div><label>納期の目安</label><input type="text" id="s-lead" placeholder="約3週間"></div>
+      <div style="flex:2 1 220px"><label>件名（書類に載ります）</label>
+        <input type="text" id="s-title" placeholder="K18YG リング 製作"></div>
     </div>
     <div style="margin-top:10px"><label>備考</label>
       <textarea id="s-note" rows="3" placeholder="例）サイズ直しは1回まで無料"></textarea></div>
     <label class="sw" style="margin-top:10px"><input type="checkbox" id="s-metal">
       <span>地金相場についての注記を入れる（地金を使う仕事のとき）</span></label>
     <div class="inline" style="margin-top:12px">
-      <button class="act" id="make-invoice">見積書を表示</button>
+      <button class="act" id="make-invoice">書類を表示</button>
+      <button class="ghost" id="est-new">新しく作る</button>
     </div>
     <p class="note" id="est-warn"></p>
   </div>
+
+  <details class="card">
+    <summary>控え（発行した書類） <span class="pill" id="doc-n"></span></summary>
+    <div style="margin-top:12px">
+      <div class="row"><div><input type="search" id="doc-q" placeholder="宛名・件名・番号で探す"></div></div>
+      <div id="doc-list" style="margin-top:10px"></div>
+    </div>
+  </details>
 </section>
 
 <!-- ============ 覚書 ============ -->
@@ -632,6 +659,8 @@ details.fold[open]{padding-bottom:12px}
     <div class="row" style="margin-top:12px">
       <div><label>タグ（カンマ区切り）</label>
         <input type="text" id="jf-tags" placeholder="例：ロウ付け, 石留め, 失敗"></div>
+      <div style="flex:2 1 240px"><label>参考にした覚書（複数選べます）</label>
+        <select id="jf-notes" multiple size="4"></select></div>
     </div>
     <div style="margin-top:10px">
       <label>メモ（手順・気づき・次回への申し送り）</label>
@@ -794,11 +823,72 @@ details.fold[open]{padding-bottom:12px}
       <div class="row" style="margin-top:10px">
         <div style="flex:2 1 260px"><label>連絡先（住所・電話・メールなど／改行できます）</label>
           <textarea id="iv-contact" rows="3" placeholder="〒000-0000 ○○県○○市…&#10;TEL 000-0000-0000&#10;mail@example.com"></textarea></div>
-        <div style="flex:2 1 260px"><label>見積書に毎回入れる文言</label>
-          <textarea id="iv-terms" rows="3" placeholder="例）お支払いは銀行振込にてお願いいたします。&#10;例）ご注文後のキャンセルはお受けできません。"></textarea></div>
+        <div style="flex:2 1 260px"><label>書類に毎回入れる文言</label>
+          <textarea id="iv-terms" rows="3" placeholder="例）ご注文後のキャンセルはお受けできません。"></textarea></div>
       </div>
+      <div class="row" style="margin-top:10px">
+        <div style="flex:2 1 240px"><label>適格請求書発行事業者 登録番号（T番号）</label>
+          <input type="text" id="iv-tno" placeholder="T1234567890123"></div>
+        <div><label>支払期限の既定（発行から◯日）</label><input type="number" id="iv-due" value="30"></div>
+      </div>
+      <div style="margin-top:10px"><label>振込先（請求書に載ります）</label>
+        <textarea id="iv-bank" rows="2" placeholder="○○銀行 ○○支店 普通 1234567 ヤマダタロウ"></textarea></div>
+      <p class="note" style="margin-bottom:0">T番号は請求書にのみ表示されます。インボイス制度の適格請求書として出す場合は必須です。
+        未登録の方は空欄のままで構いません（その場合は適格請求書になりません）。</p>
       <p class="note">ここで入れた屋号・ロゴ・連絡先が、見積書の発行者欄に入ります。
         <b>設定しないと発行者欄は空のまま</b>なので、お客様に出す前に必ず入れてください。</p>
+    </div>
+  </details>
+
+  <details class="card" data-block="est.cust">
+    <summary>お客様の控え <span class="pill" id="cu-n"></span></summary>
+    <div style="margin-top:12px">
+      <p class="note" style="margin-top:0">一度登録すると、書付タブで名前を選ぶだけで宛先が入ります。</p>
+      <div id="cu-list"></div>
+      <button class="ghost" id="cu-add" style="margin-top:10px">＋ お客様を追加</button>
+      <div class="hide" id="cu-form" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
+        <div class="row">
+          <div style="flex:2 1 200px"><label>お名前・会社名</label><input type="text" id="cu-name"></div>
+          <div><label>敬称</label><select id="cu-hon">
+            <option>様</option><option>御中</option><option value="">（なし）</option></select></div>
+          <div style="flex:2 1 200px"><label>電話・メール</label><input type="text" id="cu-tel"></div>
+        </div>
+        <div style="margin-top:10px"><label>住所</label><input type="text" id="cu-addr"></div>
+        <div style="margin-top:10px"><label>覚え（好み・サイズ・過去の取引など）</label>
+          <textarea id="cu-memo" rows="2"></textarea></div>
+        <div class="inline" style="margin-top:10px">
+          <button class="act" id="cu-save">保存</button>
+          <button class="ghost" id="cu-cancel">やめる</button>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <details class="card" data-block="est.stone">
+    <summary>石の控え <span class="pill" id="st-n"></span></summary>
+    <div style="margin-top:12px">
+      <p class="note" style="margin-top:0">よく使う石を登録しておくと、書付の明細にすぐ入れられます。
+        売値が空のときは、仕入値に掛け率をかけた額が入ります。</p>
+      <div id="st-list"></div>
+      <button class="ghost" id="st-add" style="margin-top:10px">＋ 石を追加</button>
+      <div class="hide" id="st-form" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
+        <div class="row">
+          <div><label>品番</label><input type="text" id="st-code" placeholder="D-020"></div>
+          <div><label>石種</label><input type="text" id="st-kind" placeholder="ダイヤ"></div>
+          <div><label>カット・形</label><input type="text" id="st-shape" placeholder="ラウンド"></div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div><label>サイズ (mm)</label><input type="number" id="st-size" step="0.1"></div>
+          <div><label>カラット</label><input type="number" id="st-ct" step="0.001"></div>
+          <div><label>仕入値 (円/個)</label><input type="number" id="st-cost"></div>
+          <div><label>売値 (円/個・任意)</label><input type="number" id="st-price"></div>
+        </div>
+        <div style="margin-top:10px"><label>覚え（仕入先・在庫など）</label><input type="text" id="st-memo"></div>
+        <div class="inline" style="margin-top:10px">
+          <button class="act" id="st-save">保存</button>
+          <button class="ghost" id="st-cancel">やめる</button>
+        </div>
+      </div>
     </div>
   </details>
 
@@ -852,6 +942,7 @@ const K = { p:'jw_prices', h:'jw_hist', c:'jw_casters', s:'jw_settings',
             aOver:'jw_alloy_over', aHide:'jw_alloy_hide', aAdd:'jw_alloy_add',
             prof:'jw_profile', blocks:'jw_blocks', jobs:'jw_jobs',
             nOver:'jw_note_over', nHide:'jw_note_hide', nAdd:'jw_note_add', inv:'jw_invoice', draft:'jw_draft',
+            cust:'jw_customers', stones:'jw_stones', docs:'jw_docs',
             migrated:'jw_migrated' };
 
 const DB = (()=>{
@@ -1081,7 +1172,7 @@ const OWN_CASTERS = [];
 const SEED_CASTERS = [...SAMPLE_CASTERS, ...OWN_CASTERS];
 
 let prices = {gold:0, platinum:0, silver:0, date:'', src:''};
-let market, srcMode, hist, casters, settings, alloys, jobs, notes;
+let market, srcMode, hist, casters, settings, alloys, jobs, notes, customers, stones, docs;
 let lastVolume = 0;   // cm³ / 個
 
 /* プリセット ＋ 上書き － 非表示 ＋ 追加 を重ねて素材一覧を組み立てる。
@@ -1100,6 +1191,9 @@ function loadState(){
   hist     = load(K.h, []);            // 手動登録ぶん
   casters  = load(K.c, null) || JSON.parse(JSON.stringify(SEED_CASTERS));
   jobs     = load(K.jobs, []);
+  customers= load(K.cust, []);
+  stones   = load(K.stones, []);
+  docs     = load(K.docs, []);
   refreshNotes();
   settings = load(K.s, {tax:10, margin:0});
   refreshAlloys();
@@ -1112,7 +1206,9 @@ const BLOCKS = [
   {id:'tab.calc',    g:'綴じ',         n:'目方（体積・重量）'},
   {id:'tab.quote',   g:'綴じ',         n:'工賃（見積・比較）'},
   {id:'caster.list', g:'設え',         n:'鋳造屋の登録'},
-  {id:'tab.est',     g:'綴じ',         n:'見積（見積書づくり）'},
+  {id:'tab.est',     g:'綴じ',         n:'書付（見積・請求・納品）'},
+  {id:'est.cust',    g:'設え',         n:'お客様の控え'},
+  {id:'est.stone',   g:'設え',         n:'石の控え'},
   {id:'tab.jobs',    g:'綴じ',         n:'手控（作業の記録）'},
   {id:'tab.notes',   g:'綴じ',         n:'覚書（調べもの）'},
   {id:'jobs.stats',  g:'手控',         n:'実測から出た換算倍率'},
@@ -1815,6 +1911,9 @@ function renderNotes(){
         ${n.calc==='mele' ? meleCalcHTML() : n.calc==='ring' ? ringCalcHTML() : ''}
         ${n.gallery==='cuts' ? cutsHTML() : ''}
         <div class="memo" style="background:var(--card)">${esc(n.body||'')}</div>
+        ${(()=>{ const rel = jobs.filter(j=>(j.notes||[]).includes(n.id));
+          return rel.length ? `<p class="note" style="margin-bottom:0">この覚書を使った手控：${
+            rel.map(j=>`<button class="link" data-job="${esc(j.date+'|'+(j.title||''))}">${esc(j.title||'（無題）')}</button>`).join('　')}</p>` : ''; })()}
         <div class="photos" data-np="${esc(n.id)}"></div>
         <div class="acts">
           ${edited?'<button class="ghost rv">はじめの内容に戻す</button>':''}
@@ -1835,6 +1934,13 @@ function renderNotes(){
       }
       openNotes.delete(n.id); refreshNotes(); renderNotes();
     };
+    d.querySelectorAll('[data-job]').forEach(b=> b.onclick = ()=>{
+      showTab('jobs'); jobFilter=''; renderJobs();
+      const [dt,ti] = b.dataset.job.split('|');
+      const el=[...document.querySelectorAll('#job-list .caster')]
+        .find(x=>x.querySelector('h3').textContent.trim()===(ti||'（無題）'));
+      el?.scrollIntoView({behavior:'smooth',block:'center'});
+    });
     box.appendChild(d);
     renderPhotos(d.querySelector('[data-np]'), n.photos);
     if(n.calc==='mele') bindMele(d);
@@ -2052,6 +2158,9 @@ function renderJobs(){
       <div class="meta">${esc(meta)}</div>
       ${nums.length?`<div class="meta">${nums.join('　/　')}</div>`:''}
       ${(j.tags||[]).length?`<div class="meta">${j.tags.map(t=>`<span class="pill">${esc(t)}</span>`).join(' ')}</div>`:''}
+      ${(j.notes||[]).length?`<div class="meta">覚書：${j.notes.map(id=>{
+          const n=notes.find(x=>x.id===id); return n?`<button class="link" data-note="${esc(id)}">${esc(n.title)}</button>`:'';
+        }).filter(Boolean).join('　')}</div>`:''}
       ${memoHTML(j.note)}
       <div class="photos" data-ph="${i}"></div>
       <div style="margin-top:8px"><button class="ghost e">編集</button> <button class="del x">削除</button></div>`;
@@ -2061,6 +2170,12 @@ function renderJobs(){
       (j.photos||[]).forEach(p=>{ DB.delPhoto(p.id); delete urlCache[p.id]; });
       jobs.splice(i,1); save(K.jobs,jobs); renderJobs(); renderJobStats(); renderQuote();
     };
+    d.querySelectorAll('[data-note]').forEach(b=> b.onclick = ()=>{
+      openNotes.add(b.dataset.note); showTab('notes'); renderNotes();
+      const el=[...document.querySelectorAll('#note-list details')]
+        .find(x=>x.querySelector('.nm2').textContent === (notes.find(n=>n.id===b.dataset.note)||{}).title);
+      el?.scrollIntoView({behavior:'smooth',block:'center'});
+    });
     box.appendChild(d);
     renderPhotos(d.querySelector('[data-ph]'), j.photos);
   });
@@ -2108,6 +2223,7 @@ function openJob(i){
   $('#jf-wax').value=j.wax||''; $('#jf-est').value=j.est||''; $('#jf-actual').value=j.actual||'';
   $('#jf-fee').value=j.fee||''; $('#jf-estfee').value=j.estFee||'';
   $('#jf-tags').value=(j.tags||[]).join(', '); $('#jf-note').value=j.note||'';
+  $('#jf-notes').innerHTML = notes.map(n=>`<option value="${esc(n.id)}"${(j.notes||[]).includes(n.id)?' selected':''}>${esc(n.title)}</option>`).join('');
   $('#jf-numbers').open = !!(j.wax||j.actual||j.fee);
   jobPhotos = JSON.parse(JSON.stringify(j.photos||[]));
   drawJobPhotos(); jobCalcNote();
@@ -2151,6 +2267,7 @@ $('#jf-save').onclick = ()=>{
     wax: val('#jf-wax'), est: val('#jf-est'), actual: val('#jf-actual'),
     fee: val('#jf-fee'), estFee: val('#jf-estfee'),
     tags: $('#jf-tags').value.split(',').map(t=>t.trim()).filter(Boolean),
+    notes: [...$('#jf-notes').selectedOptions].map(o=>o.value),
     note: $('#jf-note').value.trim(), photos: jobPhotos,
   };
   if(!j.title && !j.note && !j.photos.length && !j.actual){
@@ -2159,7 +2276,7 @@ $('#jf-save').onclick = ()=>{
   if(editingJob==null) jobs.push(j); else jobs[editingJob]=j;
   save(K.jobs, jobs);
   $('#job-form').classList.add('hide');
-  renderJobs(); renderQuote();
+  renderJobs(); renderNotes(); renderQuote();   // 覚書側の逆リンクも更新する
 };
 
 /* ---------- 見積 ---------- */
@@ -2294,20 +2411,136 @@ function renderQuote(){
    デザイン料と送料は自分の取り分・実費なので掛け率をかけずに加算する。 */
 let lastQuote = null;                      // 直近の見積内容（見積書に渡す）
 
+/* ===================== お客様の控え ===================== */
+let editingCust = null;
+function renderCust(){
+  $('#cu-n').textContent = `${customers.length}件`;
+  const box = $('#cu-list'); box.innerHTML='';
+  if(!customers.length) box.innerHTML = '<p class="note">まだ登録がありません。</p>';
+  customers.forEach((c,i)=>{
+    const d=document.createElement('div'); d.className='caster';
+    d.innerHTML = `<h3>${esc(c.name)} ${esc(c.hon||'')}</h3>
+      <div class="meta">${[c.tel,c.addr].filter(Boolean).map(esc).join('　')}</div>
+      ${c.memo?`<div class="memo">${esc(c.memo)}</div>`:''}
+      <div style="margin-top:8px"><button class="ghost e">編集</button> <button class="del x">削除</button></div>`;
+    d.querySelector('.e').onclick = ()=> openCust(i);
+    d.querySelector('.x').onclick = ()=>{ if(!confirm(`「${c.name}」を削除しますか？`)) return;
+      customers.splice(i,1); save(K.cust,customers); renderCust(); fillCustSelect(); };
+    box.appendChild(d);
+  });
+  fillCustSelect();
+}
+function fillCustSelect(){
+  const cur = $('#s-cust').value;
+  $('#s-cust').innerHTML = '<option value="">（直接入力）</option>' +
+    customers.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+  $('#s-cust').value = cur;
+}
+function openCust(i){
+  editingCust = i;
+  const c = i==null ? {name:'',hon:'様',tel:'',addr:'',memo:''} : customers[i];
+  $('#cu-name').value=c.name; $('#cu-hon').value=c.hon||'様'; $('#cu-tel').value=c.tel||'';
+  $('#cu-addr').value=c.addr||''; $('#cu-memo').value=c.memo||'';
+  $('#cu-form').classList.remove('hide');
+}
+$('#cu-add').onclick = ()=> openCust(null);
+$('#cu-cancel').onclick = ()=> $('#cu-form').classList.add('hide');
+$('#cu-save').onclick = ()=>{
+  const name = $('#cu-name').value.trim();
+  if(!name){ alert('お名前を入れてください'); return; }
+  const c = { id: editingCust==null ? 'c'+Date.now() : customers[editingCust].id,
+              name, hon:$('#cu-hon').value, tel:$('#cu-tel').value.trim(),
+              addr:$('#cu-addr').value.trim(), memo:$('#cu-memo').value.trim() };
+  if(editingCust==null) customers.push(c); else customers[editingCust]=c;
+  save(K.cust, customers); $('#cu-form').classList.add('hide'); renderCust();
+};
+
+/* ===================== 石の控え ===================== */
+let editingStone = null;
+const stoneName = s => [s.kind, s.shape, s.size?num(s.size,1)+'mm':'', s.ct?num(s.ct,3)+'ct':'']
+  .filter(Boolean).join(' ') || s.code || '石';
+function renderStones(){
+  $('#st-n').textContent = `${stones.length}件`;
+  const box = $('#st-list'); box.innerHTML='';
+  if(!stones.length) box.innerHTML = '<p class="note">まだ登録がありません。</p>';
+  stones.forEach((s,i)=>{
+    const d=document.createElement('div'); d.className='caster';
+    d.innerHTML = `<h3>${esc(stoneName(s))} ${s.code?`<span class="pill">${esc(s.code)}</span>`:''}</h3>
+      <div class="meta">仕入 ${yen(s.cost)}／個${s.price?`　売値 ${yen(s.price)}`:''}${s.memo?`　${esc(s.memo)}`:''}</div>
+      <div style="margin-top:8px"><button class="ghost e">編集</button> <button class="del x">削除</button></div>`;
+    d.querySelector('.e').onclick = ()=> openStone(i);
+    d.querySelector('.x').onclick = ()=>{ if(!confirm(`「${stoneName(s)}」を削除しますか？`)) return;
+      stones.splice(i,1); save(K.stones,stones); renderStones(); };
+    box.appendChild(d);
+  });
+}
+function openStone(i){
+  editingStone = i;
+  const s = i==null ? {code:'',kind:'',shape:'',size:'',ct:'',cost:0,price:'',memo:''} : stones[i];
+  ['code','kind','shape','size','ct','cost','price','memo'].forEach(f=> $('#st-'+f).value = s[f]??'');
+  $('#st-form').classList.remove('hide');
+}
+$('#st-add').onclick = ()=> openStone(null);
+$('#st-cancel').onclick = ()=> $('#st-form').classList.add('hide');
+$('#st-save').onclick = ()=>{
+  const s = { id: editingStone==null ? 's'+Date.now() : stones[editingStone].id,
+              code:$('#st-code').value.trim(), kind:$('#st-kind').value.trim(), shape:$('#st-shape').value.trim(),
+              size:val('#st-size'), ct:val('#st-ct'), cost:val('#st-cost'),
+              price:val('#st-price'), memo:$('#st-memo').value.trim() };
+  if(!s.kind && !s.code){ alert('石種か品番を入れてください'); return; }
+  if(editingStone==null) stones.push(s); else stones[editingStone]=s;
+  save(K.stones, stones); $('#st-form').classList.add('hide'); renderStones();
+};
+
 /* --- 見積の下書き（明細＋宛先）。鋳造の有無に関係なく使える --- */
-let draft = { rows:[], to:'', hon:'様', days:14, lead:'', note:'', metal:false };
+const KINDS = { quote:{t:'御見積書', lead:'下記のとおりお見積り申し上げます。'},
+                invoice:{t:'御請求書', lead:'下記のとおりご請求申し上げます。'},
+                delivery:{t:'納品書', lead:'下記のとおり納品いたしました。'} };
+let draft = { kind:'quote', no:'', rows:[], cust:'', to:'', hon:'様',
+              days:14, due:30, deliv:'', lead:'', title:'', note:'', metal:false };
 function loadDraft(){
-  draft = load(K.draft, draft);
-  $('#s-to').value=draft.to||''; $('#s-hon').value=draft.hon||'様';
-  $('#s-days').value=draft.days||load(K.inv,{}).days||14;
-  $('#s-lead').value=draft.lead||''; $('#s-note').value=draft.note||'';
-  $('#s-metal').checked=!!draft.metal;
+  const iv = load(K.inv,{});
+  draft = { kind:'quote', no:'', rows:[], cust:'', to:'', hon:'様', days:iv.days||14,
+            due:iv.due||30, deliv:'', lead:'', title:'', note:'', metal:false, ...load(K.draft,{}) };
+  $('#s-to').value=draft.to||''; $('#s-hon').value=draft.hon||'様'; $('#s-cust').value=draft.cust||'';
+  $('#s-days').value=draft.days||14; $('#s-due').value=draft.due||30; $('#s-deliv').value=draft.deliv||'';
+  $('#s-lead').value=draft.lead||''; $('#s-title').value=draft.title||'';
+  $('#s-note').value=draft.note||''; $('#s-metal').checked=!!draft.metal;
+  $$('#kind-chip button').forEach(b=> b.classList.toggle('on', b.dataset.k===draft.kind));
+  applyKind();
 }
 function saveDraft(){
-  draft.to=$('#s-to').value; draft.hon=$('#s-hon').value; draft.days=val('#s-days')||14;
-  draft.lead=$('#s-lead').value; draft.note=$('#s-note').value; draft.metal=$('#s-metal').checked;
+  draft.to=$('#s-to').value; draft.hon=$('#s-hon').value; draft.cust=$('#s-cust').value;
+  draft.days=val('#s-days')||14; draft.due=val('#s-due')||30; draft.deliv=$('#s-deliv').value;
+  draft.lead=$('#s-lead').value; draft.title=$('#s-title').value;
+  draft.note=$('#s-note').value; draft.metal=$('#s-metal').checked;
   save(K.draft, draft);
 }
+/* 書類の種類で入力欄と文言を切り替える */
+function applyKind(){
+  const k = draft.kind;
+  $('#box-days').classList.toggle('hide', k!=='quote');
+  $('#box-due').classList.toggle('hide', k!=='invoice');
+  $('#box-deliv').classList.toggle('hide', k!=='delivery');
+  $('#make-invoice').textContent = KINDS[k].t + 'を表示';
+}
+$$('#kind-chip button').forEach(b=> b.onclick = ()=>{
+  $$('#kind-chip button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  draft.kind = b.dataset.k; draft.no = '';        // 種類が変われば番号も採り直す
+  save(K.draft, draft); applyKind(); renderEstTotal();
+});
+$('#s-cust').onchange = ()=>{
+  const c = customers.find(x=>x.id===$('#s-cust').value);
+  if(c){ $('#s-to').value=c.name; $('#s-hon').value=c.hon||'様'; }
+  saveDraft();
+};
+$('#est-new').onclick = ()=>{
+  if(draft.rows.length && !confirm('いまの内容を消して新しく作りますか？（控えに残した書類は消えません）')) return;
+  draft = { kind:draft.kind, no:'', rows:[], cust:'', to:'', hon:'様',
+            days:load(K.inv,{}).days||14, due:load(K.inv,{}).due||30, deliv:'',
+            lead:'', title:'', note:'', metal:false };
+  save(K.draft, draft); loadDraft(); renderEst();
+};
 const estSub  = ()=> draft.rows.reduce((s,r)=> s + (r.q||0)*(r.u||0), 0);
 function renderEst(){
   const tb = $('#est-rows tbody'); tb.innerHTML='';
@@ -2345,6 +2578,63 @@ function renderEstTotal(){
 function addRow(r){ draft.rows.push({n:'', memo:'', q:1, u:0, ...r}); save(K.draft,draft); renderEst(); }
 $('#est-add').onclick   = ()=> addRow({});
 $('#est-ship').onclick  = ()=> addRow({n:'送料・梱包', q:1, u:800});
+$('#est-stone').onclick = ()=>{
+  if(!stones.length){
+    if(confirm('石が登録されていません。「設え」で登録しますか？')){
+      showTab('settings');
+      const d=$('[data-block="est.stone"]'); if(d){ d.open=true; d.scrollIntoView({behavior:'smooth',block:'center'}); }
+    }
+    return;
+  }
+  const mult = load(K.inv,{}).mult || 2.5;
+  const list = stones.map((s,i)=>`${i+1}. ${stoneName(s)}　${yen(s.price || s.cost*mult)}`).join('\n');
+  const pick = prompt('入れる石の番号を選んでください。\n\n'+list, '1');
+  const i = parseInt(pick)-1;
+  if(!(i>=0 && i<stones.length)) return;
+  const s = stones[i];
+  addRow({ n:stoneName(s), memo:s.code?`品番 ${s.code}`:'', q:1,
+           u: s.price || Math.ceil(s.cost*mult/100)*100 });
+};
+
+/* ===================== 控え（発行した書類） ===================== */
+function docTitle(d){ return (KINDS[d.kind]||KINDS.quote).t; }
+function renderDocs(){
+  $('#doc-n').textContent = `${docs.length}件`;
+  const q = ($('#doc-q').value||'').trim().toLowerCase();
+  const list = docs.filter(d=> !q ||
+      (d.no+' '+d.to+' '+(d.title||'')+' '+docTitle(d)).toLowerCase().includes(q))
+    .slice().sort((a,b)=> (b.date||'').localeCompare(a.date||''));
+  const box = $('#doc-list'); box.innerHTML='';
+  if(!list.length){ box.innerHTML = `<p class="note">${docs.length?'見つかりませんでした。':'まだ控えがありません。書類を表示すると自動で残ります。'}</p>`; return; }
+  list.forEach(d=>{
+    const el=document.createElement('div'); el.className='caster';
+    el.innerHTML = `<h3>${docTitle(d)} <span class="pill">${esc(d.no)}</span></h3>
+      <div class="meta">${esc(d.date)}　${esc(d.to||'（宛名なし）')} ${esc(d.hon||'')}　${esc(d.title||'')}</div>
+      <div class="meta"><b style="font-size:15px;color:var(--fg)">${yen(d.total)}</b>（税込）　${d.rows.length}明細</div>
+      <div style="margin-top:8px">
+        <button class="ghost v">見る・印刷</button>
+        <button class="ghost c">これをもとに新しく作る</button>
+        <button class="del x">削除</button></div>`;
+    el.querySelector('.v').onclick = ()=> showDoc(d);
+    el.querySelector('.c').onclick = ()=>{
+      draft = { ...draft, kind:d.kind, no:'', rows:JSON.parse(JSON.stringify(d.rows)),
+                cust:d.cust||'', to:d.to, hon:d.hon, title:d.title||'', note:d.note||'', metal:!!d.metal };
+      save(K.draft, draft); loadDraft(); renderEst();
+      window.scrollTo({top:0,behavior:'smooth'});
+    };
+    el.querySelector('.x').onclick = ()=>{
+      if(!confirm(`${docTitle(d)} ${d.no} の控えを削除しますか？`)) return;
+      docs = docs.filter(x=>x.id!==d.id); save(K.docs,docs); renderDocs();
+    };
+    box.appendChild(el);
+  });
+}
+$('#doc-q').addEventListener('input', renderDocs);
+function showDoc(d){
+  $('#invoice').innerHTML = invoiceHTML(d);
+  $('#inv-wrap').classList.remove('hide');
+  document.body.style.overflow='hidden';
+}
 $('#est-clear').onclick = ()=>{ if(!draft.rows.length||confirm('明細をすべて消しますか？')){ draft.rows=[]; save(K.draft,draft); renderEst(); } };
 ['#s-to','#s-hon','#s-days','#s-lead','#s-note','#s-metal'].forEach(x=>{
   $(x).addEventListener('input', saveDraft); $(x).addEventListener('change', saveDraft);
@@ -2393,55 +2683,82 @@ $('#to-invoice').onclick = ()=>{
   setTimeout(()=>{ w.className='note'; renderEstTotal(); }, 5000);
 };
 
-function invoiceHTML(){
+/* 書類番号：種類の記号 ＋ 発行日 ＋ その日の連番 */
+const KIND_MARK = { quote:'M', invoice:'S', delivery:'N' };
+function nextDocNo(kind){
+  const d = today().replace(/-/g,'');
+  const n = docs.filter(x=>x.no && x.no.includes(d)).length + 1;
+  return `${KIND_MARK[kind]||'M'}${d}-${String(n).padStart(2,'0')}`;
+}
+/* 引数なしなら今の下書き、docを渡せばその控えを再現する */
+function invoiceHTML(doc){
   const iv = load(K.inv, {});
-  const sub = estSub(), tax = sub*(settings.tax||0)/100, total = sub+tax;
-  const today0 = new Date();
-  const exp = new Date(today0); exp.setDate(exp.getDate() + (val('#s-days')||14));
-  const jd = d => d.toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'});
-  const no = today0.toISOString().slice(0,10).replace(/-/g,'') + '-' + String((load('jw_invno',0)+1)).padStart(2,'0');
-  save('jw_invno', load('jw_invno',0)+1);
+  const d = doc || {
+    kind:draft.kind, no:draft.no, date:today(),
+    to:$('#s-to').value.trim(), hon:$('#s-hon').value, title:$('#s-title').value.trim(),
+    rows:draft.rows.filter(r=>r.n || r.u),
+    days:val('#s-days')||14, due:val('#s-due')||30, deliv:$('#s-deliv').value,
+    lead:$('#s-lead').value.trim(), note:$('#s-note').value.trim(), metal:$('#s-metal').checked,
+    issuer:{ name:iv.name||'', contact:iv.contact||'', tno:iv.tno||'', bank:iv.bank||'', terms:iv.terms||'' },
+    marketDate: prices.date||''
+  };
+  const K2 = KINDS[d.kind] || KINDS.quote;
+  const rows = d.rows.map(r=>({ ...r, a:(r.q||0)*(r.u||0) }));
+  const sub = rows.reduce((s,r)=>s+r.a,0), taxR = settings.tax||0;
+  const tax = sub*taxR/100, total = sub+tax;
 
-  const to = $('#s-to').value.trim(), hon = $('#s-hon').value;
-  const rows = draft.rows.filter(r=>r.n || r.u).map(r=>({ ...r, a:(r.q||0)*(r.u||0) }));
+  const base = new Date(d.date+'T00:00:00');
+  const jd = x => x.toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'});
+  const plus = n => { const t=new Date(base); t.setDate(t.getDate()+n); return jd(t); };
+  const iss = d.issuer || {};
 
-  const metalNotes = $('#s-metal').checked ? [
-    `本見積は ${prices.date||jd(today0)} 時点の地金相場に基づいています。`,
-    `地金相場の変動により、有効期限を過ぎた場合は再度お見積りいたします。`,
-    `記載の重量は概算です。仕上がりにより多少前後します。`,
-  ] : [];
-  const notes = [...metalNotes, $('#s-note').value.trim(), (iv.terms||'').trim()]
-    .filter(Boolean).join('\n');
+  const metalNotes = d.metal ? [
+    `本書は ${d.marketDate||jd(base)} 時点の地金相場に基づいています。`,
+    d.kind==='quote' ? '地金相場の変動により、有効期限を過ぎた場合は再度お見積りいたします。' : '',
+    '記載の重量は概算です。仕上がりにより多少前後します。',
+  ].filter(Boolean) : [];
+  const notes = [...metalNotes, d.note, iss.terms].filter(Boolean).join('\n');
+
+  /* 適格請求書の要件：登録番号・税率ごとの区分と消費税額 */
+  const taxRows = `
+    <tr><td colspan="3" class="r">小計（${taxR}%対象）</td><td class="r">${yen(sub)}</td></tr>
+    <tr><td colspan="3" class="r">消費税（${taxR}%）</td><td class="r">${yen(tax)}</td></tr>
+    <tr class="tot"><td colspan="3" class="r">合計</td><td class="r">${yen(total)}</td></tr>`;
+
+  const meta = [
+    [d.kind==='quote'?'見積番号':d.kind==='invoice'?'請求番号':'納品番号', d.no],
+    ['発行日', jd(base)],
+    d.kind==='quote'  ? ['有効期限', plus(d.days||14)] : null,
+    d.kind==='invoice'? ['お支払期限', plus(d.due||30)] : null,
+    d.kind==='delivery' && d.deliv ? ['納品日', jd(new Date(d.deliv+'T00:00:00'))] : null,
+    d.lead ? ['納期の目安', d.lead] : null,
+  ].filter(Boolean);
 
   return `
-    <h1 class="ttl">御見積書</h1>
+    <h1 class="ttl">${K2.t}</h1>
     <div class="head">
       <div class="to">
-        <div class="nm">${to?esc(to)+' '+esc(hon):'&nbsp;'}</div>
-        <div>下記のとおりお見積り申し上げます。</div>
+        <div class="nm">${d.to?esc(d.to)+' '+esc(d.hon||''):'&nbsp;'}</div>
+        <div>${K2.lead}</div>
+        ${d.title?`<div style="margin-top:6px">件名：${esc(d.title)}</div>`:''}
       </div>
-      <div class="from"><b>${esc(iv.name||'')}</b>\n${esc(iv.contact||'')}</div>
+      <div class="from"><b>${esc(iss.name||'')}</b>\n${esc(iss.contact||'')}${
+        iss.tno && d.kind==='invoice' ? `\n登録番号 ${esc(iss.tno)}` : ''}</div>
     </div>
-    <div class="sum">御見積金額 <span class="amt">${yen(total)}</span>
-      <span style="font-size:11px">（税込）</span></div>
+    <div class="sum">${d.kind==='quote'?'御見積金額':d.kind==='invoice'?'御請求金額':'納品金額'}
+      <span class="amt">${yen(total)}</span><span style="font-size:11px">（税込）</span></div>
     <table>
       <thead><tr><th style="width:46%">品名・仕様</th><th style="width:12%">数量</th>
         <th style="width:21%">単価</th><th style="width:21%">金額</th></tr></thead>
       <tbody>
         ${rows.map(r=>`<tr><td>${esc(r.n)}${r.memo?`<br><span style="font-size:11px;color:#666">${esc(r.memo)}</span>`:''}</td>
           <td class="c">${r.q}</td><td class="r">${yen(r.u)}</td><td class="r">${yen(r.a)}</td></tr>`).join('')}
-        ${'<tr><td colspan="4" style="border:none;height:6px"></td></tr>'}
-        <tr><td colspan="3" class="r">小計</td><td class="r">${yen(sub)}</td></tr>
-        <tr><td colspan="3" class="r">消費税（${settings.tax}%）</td><td class="r">${yen(tax)}</td></tr>
-        <tr class="tot"><td colspan="3" class="r">合計</td><td class="r">${yen(total)}</td></tr>
+        <tr><td colspan="4" style="border:none;height:6px"></td></tr>
+        ${taxRows}
       </tbody>
     </table>
-    <dl class="meta">
-      <dt>見積番号</dt><dd>${no}</dd>
-      <dt>発行日</dt><dd>${jd(today0)}</dd>
-      <dt>有効期限</dt><dd>${jd(exp)}</dd>
-      ${$('#s-lead').value.trim()?`<dt>納期の目安</dt><dd>${esc($('#s-lead').value.trim())}</dd>`:''}
-    </dl>
+    <dl class="meta">${meta.map(([k,v])=>`<dt>${k}</dt><dd>${esc(String(v))}</dd>`).join('')}</dl>
+    ${d.kind==='invoice' && iss.bank ? `<div class="bank"><b>お振込先</b>\n${esc(iss.bank)}</div>` : ''}
     <div class="rem-wrap">
       <div class="rem">${esc(notes)}</div>
       ${iv.logo?`<img class="lg" src="${iv.logo}" alt="">`:''}
@@ -2449,9 +2766,24 @@ function invoiceHTML(){
 }
 $('#make-invoice').onclick = ()=>{
   if(!draft.rows.some(r=>r.n||r.u)){ alert('明細を1つ以上入れてください'); return; }
+  saveDraft();
+  if(!draft.no){ draft.no = nextDocNo(draft.kind); save(K.draft, draft); }
   $('#invoice').innerHTML = invoiceHTML();
   $('#inv-wrap').classList.remove('hide');
   document.body.style.overflow='hidden';
+
+  /* 控えに残す。同じ番号なら上書きするので、見直すたびに増えない */
+  const iv = load(K.inv,{});
+  const rows = draft.rows.filter(r=>r.n||r.u);
+  const sub = rows.reduce((s,r)=>s+(r.q||0)*(r.u||0),0), tax = sub*(settings.tax||0)/100;
+  const rec = { id:draft.no, no:draft.no, kind:draft.kind, date:today(),
+    cust:draft.cust, to:draft.to, hon:draft.hon, title:draft.title,
+    rows:JSON.parse(JSON.stringify(rows)), sub, tax, total:sub+tax,
+    days:draft.days, due:draft.due, deliv:draft.deliv, lead:draft.lead,
+    note:draft.note, metal:draft.metal, marketDate:prices.date||'',
+    issuer:{ name:iv.name||'', contact:iv.contact||'', tno:iv.tno||'', bank:iv.bank||'', terms:iv.terms||'' } };
+  docs = [rec, ...docs.filter(x=>x.id!==rec.id)].slice(0,500);
+  save(K.docs, docs); renderDocs();
 };
 $('#inv-close').onclick = ()=>{ $('#inv-wrap').classList.add('hide'); document.body.style.overflow=''; };
 $('#inv-print').onclick = ()=> window.print();
@@ -2553,6 +2885,7 @@ function renderInvoiceSettings(){
   const iv = load(K.inv, {mult:2.5, days:14});
   $('#iv-name').value = iv.name||''; $('#iv-contact').value = iv.contact||'';
   $('#iv-terms').value = iv.terms||''; $('#iv-mult').value = iv.mult||2.5; $('#iv-days').value = iv.days||14;
+  $('#iv-tno').value = iv.tno||''; $('#iv-bank').value = iv.bank||''; $('#iv-due').value = iv.due||30;
   $('#s-mult').value = iv.mult||2.5; $('#s-days').value = iv.days||14;   // 見積欄の既定値にも反映
   $('#iv-n').textContent = iv.name ? '設定済み' : '未設定';
   $('#iv-logo-box').innerHTML = iv.logo
@@ -2560,11 +2893,13 @@ function renderInvoiceSettings(){
     : '<p class="note" style="margin:0">未設定</p>';
   $('#iv-logo-del').classList.toggle('hide', !iv.logo);
 }
-['#iv-name','#iv-contact','#iv-terms','#iv-mult','#iv-days'].forEach(x=> $(x).onchange = ()=>{
-  saveInvoice({ name:$('#iv-name').value.trim(), contact:$('#iv-contact').value.trim(),
-                terms:$('#iv-terms').value.trim(), mult:val('#iv-mult')||2.5, days:val('#iv-days')||14 });
-  renderInvoiceSettings(); renderSell();
-});
+['#iv-name','#iv-contact','#iv-terms','#iv-mult','#iv-days','#iv-tno','#iv-bank','#iv-due']
+  .forEach(x=> $(x).onchange = ()=>{
+    saveInvoice({ name:$('#iv-name').value.trim(), contact:$('#iv-contact').value.trim(),
+                  terms:$('#iv-terms').value.trim(), mult:val('#iv-mult')||2.5, days:val('#iv-days')||14,
+                  tno:$('#iv-tno').value.trim(), bank:$('#iv-bank').value.trim(), due:val('#iv-due')||30 });
+    renderInvoiceSettings(); renderSell();
+  });
 $('#iv-logo-add').onclick = ()=> $('#iv-logo-file').click();
 $('#iv-logo-file').onchange = async e=>{
   const f = e.target.files[0]; e.target.value=''; if(!f) return;
@@ -2640,7 +2975,7 @@ async function initRender(){
   const d = new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
   $('#price-date').textContent = d;
   fillAlloySelects(); renderShapeFields(); renderCasters(); renderJobs(); renderNotes();
-  loadDraft(); renderEst();
+  renderCust(); renderStones(); loadDraft(); renderEst(); renderDocs();
   renderSettings(); renderBackupNote();
   renderInvoiceSettings(); renderProfile(); renderBlocks(); applyBlocks();
   syncPrices();          // 保存済みデータで即描画
