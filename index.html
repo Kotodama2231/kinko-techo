@@ -31,6 +31,13 @@ nav button{background:none;border:none;border-bottom:2px solid transparent;paddi
 nav button.on{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
 main{max-width:960px;margin:0 auto;padding:16px 12px 60px}
 section{display:none} section.on{display:block}
+/* タブの中でさらに帳面を分ける（手控／お客様／石） */
+.subnav{display:flex;gap:4px;margin-bottom:14px;background:var(--card);
+  border:1px solid var(--line);border-radius:10px;padding:4px}
+.subnav button{flex:1 1 0;min-width:0;background:none;border:none;border-radius:7px;padding:9px 6px;
+  font-size:14px;color:var(--muted);cursor:pointer;white-space:nowrap;font-family:inherit}
+.subnav button.on{background:var(--accent);color:#fff;font-weight:600}
+.subpage{display:none} .subpage.on{display:block}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:14px}
 .card h2{font-size:14px;margin:0 0 10px;letter-spacing:.04em;color:var(--muted);font-weight:600}
 .card h2.hero{font-size:20px;color:var(--fg);letter-spacing:.01em;margin-bottom:14px;
@@ -613,6 +620,13 @@ button.link:hover{opacity:.75}
 
 <!-- ============ 手控 ============ -->
 <section id="jobs">
+  <div class="subnav" id="jobs-nav">
+    <button data-sp="job" class="on">手控</button>
+    <button data-sp="cust" data-block="est.cust">お客様</button>
+    <button data-sp="stone" data-block="est.stone">石</button>
+  </div>
+
+  <div class="subpage on" id="sp-job">
   <div class="card">
     <h2>手控 <span class="pill" id="job-count"></span></h2>
     <div class="chip" id="job-filter"></div>
@@ -682,6 +696,59 @@ button.link:hover{opacity:.75}
     </tr></thead><tbody></tbody></table></div>
     <p class="note" id="job-stats-note"></p>
   </div>
+  </div><!-- /sp-job -->
+
+  <div class="subpage" id="sp-cust" data-block="est.cust">
+    <div class="card">
+      <h2>お客様の控え <span class="pill" id="cu-n"></span></h2>
+      <p class="note" style="margin-top:0">一度登録すると、書付タブで名前を選ぶだけで宛先が入ります。</p>
+      <div id="cu-list"></div>
+      <button class="ghost" id="cu-add" style="margin-top:10px">＋ お客様を追加</button>
+      <div class="hide" id="cu-form" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
+        <div class="row">
+          <div style="flex:2 1 200px"><label>お名前・会社名</label><input type="text" id="cu-name"></div>
+          <div><label>敬称</label><select id="cu-hon">
+            <option>様</option><option>御中</option><option value="">（なし）</option></select></div>
+          <div style="flex:2 1 200px"><label>電話・メール</label><input type="text" id="cu-tel"></div>
+        </div>
+        <div style="margin-top:10px"><label>住所</label><input type="text" id="cu-addr"></div>
+        <div style="margin-top:10px"><label>覚え（好み・サイズ・過去の取引など）</label>
+          <textarea id="cu-memo" rows="2"></textarea></div>
+        <div class="inline" style="margin-top:10px">
+          <button class="act" id="cu-save">保存</button>
+          <button class="ghost" id="cu-cancel">やめる</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /sp-cust -->
+
+  <div class="subpage" id="sp-stone" data-block="est.stone">
+    <div class="card">
+      <h2>石の控え <span class="pill" id="st-n"></span></h2>
+      <p class="note" style="margin-top:0">よく使う石を登録しておくと、書付の明細にすぐ入れられます。
+        売値が空のときは、仕入値に掛け率をかけた額が入ります。</p>
+      <div id="st-list"></div>
+      <button class="ghost" id="st-add" style="margin-top:10px">＋ 石を追加</button>
+      <div class="hide" id="st-form" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
+        <div class="row">
+          <div><label>品番</label><input type="text" id="st-code" placeholder="D-020"></div>
+          <div><label>石種</label><input type="text" id="st-kind" placeholder="ダイヤ"></div>
+          <div><label>カット・形</label><input type="text" id="st-shape" placeholder="ラウンド"></div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div><label>サイズ (mm)</label><input type="number" id="st-size" step="0.1"></div>
+          <div><label>カラット</label><input type="number" id="st-ct" step="0.001"></div>
+          <div><label>仕入値 (円/個)</label><input type="number" id="st-cost"></div>
+          <div><label>売値 (円/個・任意)</label><input type="number" id="st-price"></div>
+        </div>
+        <div style="margin-top:10px"><label>覚え（仕入先・在庫など）</label><input type="text" id="st-memo"></div>
+        <div class="inline" style="margin-top:10px">
+          <button class="act" id="st-save">保存</button>
+          <button class="ghost" id="st-cancel">やめる</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /sp-stone -->
 </section>
 
 <!-- ============ 設定 ============ -->
@@ -837,58 +904,6 @@ button.link:hover{opacity:.75}
         未登録の方は空欄のままで構いません（その場合は適格請求書になりません）。</p>
       <p class="note">ここで入れた屋号・ロゴ・連絡先が、見積書の発行者欄に入ります。
         <b>設定しないと発行者欄は空のまま</b>なので、お客様に出す前に必ず入れてください。</p>
-    </div>
-  </details>
-
-  <details class="card" data-block="est.cust">
-    <summary>お客様の控え <span class="pill" id="cu-n"></span></summary>
-    <div style="margin-top:12px">
-      <p class="note" style="margin-top:0">一度登録すると、書付タブで名前を選ぶだけで宛先が入ります。</p>
-      <div id="cu-list"></div>
-      <button class="ghost" id="cu-add" style="margin-top:10px">＋ お客様を追加</button>
-      <div class="hide" id="cu-form" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
-        <div class="row">
-          <div style="flex:2 1 200px"><label>お名前・会社名</label><input type="text" id="cu-name"></div>
-          <div><label>敬称</label><select id="cu-hon">
-            <option>様</option><option>御中</option><option value="">（なし）</option></select></div>
-          <div style="flex:2 1 200px"><label>電話・メール</label><input type="text" id="cu-tel"></div>
-        </div>
-        <div style="margin-top:10px"><label>住所</label><input type="text" id="cu-addr"></div>
-        <div style="margin-top:10px"><label>覚え（好み・サイズ・過去の取引など）</label>
-          <textarea id="cu-memo" rows="2"></textarea></div>
-        <div class="inline" style="margin-top:10px">
-          <button class="act" id="cu-save">保存</button>
-          <button class="ghost" id="cu-cancel">やめる</button>
-        </div>
-      </div>
-    </div>
-  </details>
-
-  <details class="card" data-block="est.stone">
-    <summary>石の控え <span class="pill" id="st-n"></span></summary>
-    <div style="margin-top:12px">
-      <p class="note" style="margin-top:0">よく使う石を登録しておくと、書付の明細にすぐ入れられます。
-        売値が空のときは、仕入値に掛け率をかけた額が入ります。</p>
-      <div id="st-list"></div>
-      <button class="ghost" id="st-add" style="margin-top:10px">＋ 石を追加</button>
-      <div class="hide" id="st-form" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
-        <div class="row">
-          <div><label>品番</label><input type="text" id="st-code" placeholder="D-020"></div>
-          <div><label>石種</label><input type="text" id="st-kind" placeholder="ダイヤ"></div>
-          <div><label>カット・形</label><input type="text" id="st-shape" placeholder="ラウンド"></div>
-        </div>
-        <div class="row" style="margin-top:10px">
-          <div><label>サイズ (mm)</label><input type="number" id="st-size" step="0.1"></div>
-          <div><label>カラット</label><input type="number" id="st-ct" step="0.001"></div>
-          <div><label>仕入値 (円/個)</label><input type="number" id="st-cost"></div>
-          <div><label>売値 (円/個・任意)</label><input type="number" id="st-price"></div>
-        </div>
-        <div style="margin-top:10px"><label>覚え（仕入先・在庫など）</label><input type="text" id="st-memo"></div>
-        <div class="inline" style="margin-top:10px">
-          <button class="act" id="st-save">保存</button>
-          <button class="ghost" id="st-cancel">やめる</button>
-        </div>
-      </div>
     </div>
   </details>
 
@@ -1207,8 +1222,8 @@ const BLOCKS = [
   {id:'tab.quote',   g:'綴じ',         n:'工賃（見積・比較）'},
   {id:'caster.list', g:'設え',         n:'鋳造屋の登録'},
   {id:'tab.est',     g:'綴じ',         n:'書付（見積・請求・納品）'},
-  {id:'est.cust',    g:'設え',         n:'お客様の控え'},
-  {id:'est.stone',   g:'設え',         n:'石の控え'},
+  {id:'est.cust',    g:'手控',         n:'お客様の控え'},
+  {id:'est.stone',   g:'手控',         n:'石の控え'},
   {id:'tab.jobs',    g:'綴じ',         n:'手控（作業の記録）'},
   {id:'tab.notes',   g:'綴じ',         n:'覚書（調べもの）'},
   {id:'jobs.stats',  g:'手控',         n:'実測から出た換算倍率'},
@@ -1246,15 +1261,26 @@ function applyBlocks(){
       if(first) first.click();
     }
   });
+  // 隠した帳面が選択中だったら手控へ戻す。全部隠れたら仕切り自体を出さない
+  const sub = $('#jobs-nav button.on');
+  if(sub && sub.dataset.block && !visible(sub.dataset.block)) showSub('job');
+  $('#jobs-nav').classList.toggle('hide',
+    $$('#jobs-nav button').filter(b=> !b.classList.contains('hide')).length < 2);
 }
 function showTab(t){
   $$('nav button').forEach(x=>x.classList.toggle('on', x.dataset.t===t));
   $$('main section').forEach(s=>s.classList.toggle('on', s.id===t));
   if(t==='quote') renderQuote();
 }
+/* 手控タブの中の帳面（手控／お客様／石）を切り替える */
+function showSub(s){
+  $$('#jobs-nav button').forEach(b=> b.classList.toggle('on', b.dataset.sp===s));
+  $$('#jobs .subpage').forEach(p=> p.classList.toggle('on', p.id==='sp-'+s));
+}
 
 /* ---------- タブ ---------- */
 $$('nav button').forEach(b => b.onclick = ()=> showTab(b.dataset.t));
+$$('#jobs-nav button').forEach(b => b.onclick = ()=> showSub(b.dataset.sp));
 
 function renderProfile(){
   $('#profile-chip').innerHTML = Object.entries(PROFILES).map(([k,p])=>
@@ -1935,7 +1961,7 @@ function renderNotes(){
       openNotes.delete(n.id); refreshNotes(); renderNotes();
     };
     d.querySelectorAll('[data-job]').forEach(b=> b.onclick = ()=>{
-      showTab('jobs'); jobFilter=''; renderJobs();
+      showTab('jobs'); showSub('job'); jobFilter=''; renderJobs();
       const [dt,ti] = b.dataset.job.split('|');
       const el=[...document.querySelectorAll('#job-list .caster')]
         .find(x=>x.querySelector('h3').textContent.trim()===(ti||'（無題）'));
@@ -2432,7 +2458,8 @@ function renderCust(){
 }
 function fillCustSelect(){
   const cur = $('#s-cust').value;
-  $('#s-cust').innerHTML = '<option value="">（直接入力）</option>' +
+  $('#s-cust').innerHTML =
+    `<option value="">${customers.length?'（直接入力）':'（控えは「手控」→「お客様」で登録）'}</option>` +
     customers.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
   $('#s-cust').value = cur;
 }
@@ -2580,9 +2607,8 @@ $('#est-add').onclick   = ()=> addRow({});
 $('#est-ship').onclick  = ()=> addRow({n:'送料・梱包', q:1, u:800});
 $('#est-stone').onclick = ()=>{
   if(!stones.length){
-    if(confirm('石が登録されていません。「設え」で登録しますか？')){
-      showTab('settings');
-      const d=$('[data-block="est.stone"]'); if(d){ d.open=true; d.scrollIntoView({behavior:'smooth',block:'center'}); }
+    if(confirm('石が登録されていません。「手控」→「石」で登録しますか？')){
+      showTab('jobs'); showSub('stone'); $('#st-add').click();
     }
     return;
   }
